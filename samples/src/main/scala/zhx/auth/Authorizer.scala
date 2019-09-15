@@ -5,7 +5,7 @@ import zio.{IO, Task, ZIO}
 
 object Authorizer {
 
-  // we implement a trivial authorization level to demonstration the separation of
+  // we implement a trivial authorization level to demonstrate the separation of
   // responsibility between authorization and authentication
 
   sealed trait Role

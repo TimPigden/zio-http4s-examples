@@ -15,12 +15,12 @@ object Authenticator {
   }
 
   trait Service {
-    def authenticate(userName: String, password: String): IO[AuthenticationError, AuthToken]
+    def authenticate(userName: String, password: String): Task[AuthToken]
   }
 
   val friendlyAuthenticator: Service = { (userName, password) =>
-    userName match {
-      case "friend" => IO.succeed(AuthToken(password)) // rather trivial implementation but does allow us to inject variety
+    password match {
+      case "friend" => IO.succeed(AuthToken(userName)) // rather trivial implementation but does allow us to inject variety
       case _ => IO.fail(authenticationError)
     }
   }
