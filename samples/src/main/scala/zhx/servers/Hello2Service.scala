@@ -17,7 +17,7 @@ class Hello2Service[R <: Authenticator] {
   private val dsl = Http4sDsl[AuthenticatorTask]
   import dsl._
 
-  val service = AuthedRoutes.of[AuthToken, AuthenticatorTask] {
+  val service: AuthedRoutes[AuthToken, AuthenticatorTask] = AuthedRoutes.of[AuthToken, AuthenticatorTask] {
     case GET -> Root as authToken => Ok(s"hello! ${authToken.tok}")
   }
 
