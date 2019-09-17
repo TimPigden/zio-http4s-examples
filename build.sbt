@@ -39,6 +39,7 @@ lazy val Http4sVersion = "0.20.10"
 lazy val http4sBlazeServer = "org.http4s"  %% "http4s-blaze-server" % Http4sVersion
 lazy val http4sBlazeClient = "org.http4s"  %% "http4s-blaze-client" % Http4sVersion
 lazy val http4sDsl = "org.http4s"      %% "http4s-dsl"          % Http4sVersion
+lazy val http4sCirce = "org.http4s"      %% "http4s-circe"          % Http4sVersion
 
 lazy val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
 lazy val scalaTestNotTest = "org.scalatest" %% "scalatest" % scalaTestVersion
@@ -53,7 +54,6 @@ lazy val zio = "dev.zio" %% "zio" %  `zio-version`
 lazy val `zio-test` = "dev.zio" %% "zio-test" % `zio-version` % "test"
 lazy val `zio-interop-shared` = "dev.zio" %% "zio-interop-shared" % `zio-version`
 lazy val `zio-interop-cats` = "dev.zio" %% "zio-interop-cats" % `zio-interop`
-
 
 lazy val testDependencies = Seq(libraryDependencies ++= Seq(
   scalaTest,
@@ -83,6 +83,7 @@ lazy val `samples` = (project in file ("samples"))
     http4sBlazeClient,
     http4sDsl,
     catsEffect,
+    scalaXml,
     `zio-test`
   ))
 

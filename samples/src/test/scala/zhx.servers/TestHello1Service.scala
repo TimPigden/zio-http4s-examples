@@ -5,7 +5,7 @@ import zio._
 import zio.interop.catz._
 import zio.test.{DefaultRunnableSpec, Predicate, assert, fail, suite, testM}
 
-object ExampleSpec extends DefaultRunnableSpec(
+object TestHello1Service extends DefaultRunnableSpec(
   suite("routes suite")(
     testM("root request returns Ok") {
       val io: Task[Response[Task]] = Hello1Service.service.run(Request[Task](Method.GET, Uri.uri("/")))
