@@ -12,6 +12,7 @@ bin
 .tmpBin
 .factorypath
 .settings
+scratch/
 logs/
 log/
 .idea/
