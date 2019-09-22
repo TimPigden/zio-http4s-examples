@@ -25,7 +25,7 @@ object Encoders {
       .stringEncoder[F]
       .contramap { x: X =>
         val node = writer.write(x)
-        val s = (new PrettyPrinter(80, 2)).format(node) // just because it's easier to debug
+        val s = new PrettyPrinter(80, 2).format(node) // just because it's easier to debug
         s
       }
       .withContentType(`Content-Type`(MediaType.application.xml))
