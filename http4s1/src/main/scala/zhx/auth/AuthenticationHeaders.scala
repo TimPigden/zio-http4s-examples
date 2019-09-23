@@ -13,7 +13,7 @@ import zio.{IO, RIO, Task}
 trait AuthenticationHeaders[R <: Authenticator] {
   type AuthHTask[T] = RIO[R, T]
 
-  private def unauthenticated = IO.succeed(Left(new Exception("bad format authentication")))
+  private def unauthenticated = IO.succeed(Left(new Exception("Unauthenticated")))
 
   def getToken(req: Request[AuthHTask]) : AuthHTask[Either[Throwable, AuthToken]] = {
     val userNamePasswordOpt: Option[Array[String]] =

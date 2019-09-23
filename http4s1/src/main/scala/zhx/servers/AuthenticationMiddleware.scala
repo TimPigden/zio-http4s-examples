@@ -29,7 +29,7 @@ trait AuthenticationMiddleware {
   }
 
   val onFailure: AuthedRoutes[String, AppTask] = Kleisli(req => OptionT.liftF {
-    Forbidden(req.authInfo)
+    Forbidden()
   })
 
   val authenticationMiddleware: AuthMiddleware[AppTask, AuthToken] = AuthMiddleware(authUser, onFailure)

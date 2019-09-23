@@ -23,8 +23,8 @@ object TestHello1Service extends DefaultRunnableSpec (
     },
     testM("root request body returns hello!") {
       val io = for{
-        request <- Hello1Service.service.run(Request[Task](Method.GET, uri"/"))
-        body <- request.body.compile.toVector.map(x => x.map(_.toChar).mkString(""))
+        response <- Hello1Service.service.run(Request[Task](Method.GET, uri"/"))
+        body <- response.body.compile.toVector.map(x => x.map(_.toChar).mkString(""))
       }yield body
       assertM(io, equalTo("hello!"))
     }

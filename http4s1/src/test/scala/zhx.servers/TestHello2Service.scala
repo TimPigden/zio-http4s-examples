@@ -13,6 +13,7 @@ object TestHello2Service extends  DefaultRunnableSpec(
 
   suite("routes suite") (
 
+
     testM("root request returns forbidden") {
       val io = hello2Service.run(Request[withMiddleware.AppTask](Method.GET, uri"/"))
         .provide(new Authenticator{ override val authenticatorService = Authenticator.friendlyAuthenticator})
@@ -20,6 +21,20 @@ object TestHello2Service extends  DefaultRunnableSpec(
         equalTo(Status.Forbidden)) // will fail if nothing there
     },
 
+    testM("root request body returns hello!") {
+      val req = Request[withMiddleware.AppTask](Method.GET, uri"/")
+      val io = hello2Service.run(req)
+      val iop = (for {
+        request <- io
+        body <- request.body.compile.toVector.map(x => x.map(_.toChar).mkString(""))
+        _ = println(s"got body $body")
+      } yield body)
+        .provide(new Authenticator {
+          override val authenticatorService = Authenticator.friendlyAuthenticator
+        })
+      assertM(iop, equalTo("hello! tim"))
+    },
+/*
     testM("root request with authentication returns ok") {
       val req1 = Request[withMiddleware.AppTask](Method.GET, uri"/")
       val req = AuthenticationHeaders.addAuthentication(req1, "tim", "friend")
@@ -55,6 +70,7 @@ object TestHello2Service extends  DefaultRunnableSpec(
         .provide(new Authenticator{ override val authenticatorService = Authenticator.friendlyAuthenticator})
       assertM(io.map(_.status), equalTo(Status.Forbidden))
     }
+*/
 
   )
 )

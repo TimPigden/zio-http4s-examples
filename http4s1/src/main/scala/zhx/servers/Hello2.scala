@@ -1,5 +1,7 @@
 package zhx.servers
+import cats.data.{Kleisli, OptionT}
 import fs2.Stream.Compiler._
+import org.http4s.{Request, Response}
 import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
@@ -14,9 +16,6 @@ import zio.interop.catz._
 object Hello2 extends App with AuthenticationMiddleware {
 
   type AppEnvironment = Clock with Console with Authenticator with Blocking
-
-  def run(args: List[String]): ZIO[Environment, Nothing, Int] =
-    server.foldM(err => putStrLn(s"execution failed with $err") *> ZIO.succeed(1), _ => ZIO.succeed(0))
 
   val hello2Service = new Hello2Service[AppEnvironment] {}
 
@@ -46,7 +45,9 @@ object Hello2 extends App with AuthenticationMiddleware {
 
         override def authenticatorService: Authenticator.Service = Authenticator.friendlyAuthenticator
       }
-
-
     }
+
+  def run(args: List[String]): ZIO[Environment, Nothing, Int] =
+    server.foldM(err => putStrLn(s"execution failed with $err") *> ZIO.succeed(1), _ => ZIO.succeed(0))
+
 }
