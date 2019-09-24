@@ -11,15 +11,15 @@ import zio.interop.catz._
 
 trait AuthenticationMiddleware {
 
-  type AuthenticationEnvironment <: Authenticator
-  type AppTask[A] = RIO[AuthenticationEnvironment, A]
+  type AppEnvironment <: Authenticator
+  type AppTask[A] = RIO[AppEnvironment, A]
 
   val dsl: Http4sDsl[AppTask] = Http4sDsl[AppTask]
   import dsl._
 
-  val authenticationHeaders = new AuthenticationHeaders[AuthenticationEnvironment] {}
+  val authenticationHeaders = new AuthenticationHeaders[AppEnvironment] {}
 
-  private def authUser: Kleisli[AppTask, Request[AppTask], Either[String, AuthToken]] = {
+  def authUser: Kleisli[AppTask, Request[AppTask], Either[String, AuthToken]] = {
     Kleisli({ request =>
       authenticationHeaders.getToken(request).map { e => {
         e.left.map (_.toString)
@@ -29,9 +29,9 @@ trait AuthenticationMiddleware {
   }
 
   val onFailure: AuthedRoutes[String, AppTask] = Kleisli(req => OptionT.liftF {
-    Forbidden(req.authInfo)
+    Forbidden()
   })
 
-  val authenticationMiddleware = AuthMiddleware(authUser, onFailure)
+  val authenticationMiddleware: AuthMiddleware[AppTask, AuthToken] = AuthMiddleware(authUser, onFailure)
 }
 

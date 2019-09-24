@@ -9,10 +9,7 @@ import zio.interop.catz.implicits._
 
 object Hello1 extends App {
 
-  def run(args: List[String]) =
-    server.fold(_ => 1, _ => 0)
-
-  val server = ZIO.runtime[Environment]
+  val server: ZIO[Environment, Throwable, Unit] = ZIO.runtime[Environment]
     .flatMap {
       implicit rts =>
         BlazeServerBuilder[Task]
@@ -23,4 +20,6 @@ object Hello1 extends App {
           .drain
     }
 
+  def run(args: List[String]) =
+    server.fold(_ => 1, _ => 0)
 }

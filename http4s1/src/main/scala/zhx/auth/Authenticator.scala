@@ -10,7 +10,7 @@ object Authenticator {
 
   trait AuthenticationError extends Throwable
 
-  val authenticationError = new AuthenticationError {
+  val authenticationError: AuthenticationError = new AuthenticationError {
     override def getMessage: String = "Authentication Error"
   }
 
