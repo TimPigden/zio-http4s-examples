@@ -10,19 +10,22 @@ import zio.test.Assertion.equalTo
 import zio.test.{DefaultRunnableSpec, assert, assertM, suite, testM}
 import zio.interop.catz._
 import zio.IO._
+import zio.blocking.Blocking
+import zio.clock.Clock
+import zio.console.Console
 
-import scala.concurrent.ExecutionContext.Implicits.global
 
 object TestHello1 extends DefaultRunnableSpec(
 
+
+
   suite("routes suite")(
-    testM("root request returns Ok") {
-      ZIO.runtime[Any].flatMap { implicit rts =>
-        BlazeClientBuilder[Task](global).resource.use { client =>
-          val req = Request[Task](Method.GET, uri"http://localhost:8080/")
-          assertM(client.status(req), equalTo(Status.Ok))
-        }
+    testM("test get") {
+      ClientTest.testClientM { client =>
+        val req = Request[Task](Method.GET, uri"http://localhost:8080/")
+        assertM(client.status(req), equalTo(Status.Ok))
       }
-    },
+    }
   )
+
 )

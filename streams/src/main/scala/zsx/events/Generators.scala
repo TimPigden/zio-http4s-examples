@@ -16,13 +16,13 @@ object Generators {
    * convenience extractor from the ZIO environment R
    */
   def getClock: ZIO[Clock, Nothing, Clock.Service[Any]] =
-    ZIO.accessM(C => IO.succeed(C.clock))
+    ZIO.access(_.clock)
 
   /**
    * convenience extractor from the ZIO environment R
    */
   def getRandom: ZIO[Random, Nothing, Random.Service[Any]] =
-    ZIO.accessM(C => IO.succeed(C.random))
+    ZIO.access(_.random)
 
   /**
    * typeclass for generating a state S and ChillEvent from a previous state

@@ -9,7 +9,7 @@ import zio.interop.catz.implicits._
 
 object Hello1 extends App {
 
-  val server = ZIO.runtime[Environment]
+  val server: ZIO[Environment, Throwable, Unit] = ZIO.runtime[Environment]
     .flatMap {
       implicit rts =>
         BlazeServerBuilder[Task]
