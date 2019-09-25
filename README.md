@@ -7,4 +7,8 @@ Tests use the latest zio-test library
 
 The streams subproject is to contain examples of use of zio streams. But it is currently at very early stages
 
+# Licence
+This project licenced under [Creative Commons CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/)
+
+
 
