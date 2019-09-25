@@ -23,7 +23,4 @@ object ClientTest {
         fClient(client)
       }
     }
-
-  case class ServerEnv(clock: Clock, console: Console, blocking: Blocking, serverCreated: Unit)
-
 }
