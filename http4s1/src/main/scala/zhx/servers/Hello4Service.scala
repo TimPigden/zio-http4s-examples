@@ -18,7 +18,7 @@ class Hello4Service[R <: Authenticator] {
   import dsl._
 
   val service = AuthedRoutes.of[AuthToken, AuthenticatorTask] {
-    case GET -> Root as authToken => Ok("hello!")
+    case GET -> Root as authToken => Ok("hello4!")
     case GET -> Root / "president" as authToken => Ok(Person.donald) // uses implicit encoder
     // todo is there a prettier way to do this?
     case AuthedRequest(authToken, req @ POST -> Root / "ageOf") =>

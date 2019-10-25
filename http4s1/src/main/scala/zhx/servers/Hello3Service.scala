@@ -16,7 +16,7 @@ object Hello3Service {
   import dsl._
 
   val service = HttpRoutes.of[Task] {
-    case GET -> Root => Ok("hello!")
+    case GET -> Root => Ok("hello3!")
     case GET -> Root / "president" => Ok(Person.donald) // uses implicit encoder
     case req @ POST -> Root / "ageOf" =>
       req.decode[Person] { m => Ok(m.age.toString)}

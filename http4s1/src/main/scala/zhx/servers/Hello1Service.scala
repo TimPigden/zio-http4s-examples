@@ -16,7 +16,7 @@ object Hello1Service {
   import dsl._
 
   val service = HttpRoutes.of[Task] {
-    case GET -> Root => Ok("hello!")
+    case GET -> Root => Ok("hello1!")
   }.orNotFound
 
 }

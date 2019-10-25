@@ -15,7 +15,7 @@ import zio.interop.catz._
 
 object Hello2 extends App with AuthenticationMiddleware {
 
-  type AppEnvironment = Clock with Console with Authenticator with Blocking
+  type AppEnvironment = Authenticator with Clock
 
   val hello2Service = new Hello2Service[AppEnvironment] {}
 
@@ -37,17 +37,15 @@ object Hello2 extends App with AuthenticationMiddleware {
     }
 
   val server = server1
-    .provideSome[Environment] { base =>
-      new Clock with Console with Blocking with Authenticator {
+    .provideSome[ZEnv] { base =>
+      new  Authenticator with Clock {
         override val clock: Clock.Service[Any] = base.clock
-        override val console: Console.Service[Any] = base.console
-        override val blocking: Blocking.Service[Any] = base.blocking
 
         override def authenticatorService: Authenticator.Service = Authenticator.friendlyAuthenticator
       }
     }
 
-  def run(args: List[String]): ZIO[Environment, Nothing, Int] =
+  def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
     server.foldM(err => putStrLn(s"execution failed with $err") *> ZIO.succeed(1), _ => ZIO.succeed(0))
 
 }

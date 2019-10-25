@@ -6,7 +6,7 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 resolvers += Resolver.sonatypeRepo("releases")
 
 inThisBuild(Seq(
-  version := "0.5.3",
+  version := "0.6",
   isSnapshot := true,
   scalaVersion := "2.12.9"
 ))
@@ -41,8 +41,8 @@ lazy val http4sBlazeClient = "org.http4s"  %% "http4s-blaze-client" % Http4sVers
 lazy val http4sDsl = "org.http4s"      %% "http4s-dsl"          % Http4sVersion
 
 
-lazy val `zio-version` = "1.0.0-RC13"
-lazy val `zio-interop` = "2.0.0.0-RC3"
+lazy val `zio-version` = "1.0.0-RC15"
+lazy val `zio-interop` = "2.0.0.0-RC6"
 lazy val zio = "dev.zio" %% "zio" %  `zio-version`
 lazy val `zio-test` = "dev.zio" %% "zio-test" % `zio-version` % "test"
 lazy val `zio-test-sbt` = "dev.zio" %% "zio-test-sbt" % `zio-version` % "test"

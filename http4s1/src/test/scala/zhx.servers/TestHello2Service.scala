@@ -2,17 +2,18 @@ package zhx.servers
 
 import org.http4s._
 import zhx.auth.{AuthenticationHeaders, Authenticator}
-import zio._
 import org.http4s.implicits._
 import zio.interop.catz._
 import Middlewares._
 import zio.test._
+import zio.test.environment._
+import cats.implicits._
 import zio.test.Assertion._
 import org.http4s.server.Router
+import zio.IO
 object TestHello2Service extends  DefaultRunnableSpec(
 
   suite("routes suite") (
-
 
     testM("root request returns forbidden") {
       val io = hello2Service.run(Request[withMiddleware.AppTask](Method.GET, uri"/"))
@@ -21,20 +22,6 @@ object TestHello2Service extends  DefaultRunnableSpec(
         equalTo(Status.Forbidden)) // will fail if nothing there
     },
 
-    testM("root request body returns hello!") {
-      val req = Request[withMiddleware.AppTask](Method.GET, uri"/")
-      val io = hello2Service.run(req)
-      val iop = (for {
-        request <- io
-        body <- request.body.compile.toVector.map(x => x.map(_.toChar).mkString(""))
-        _ = println(s"got body $body")
-      } yield body)
-        .provide(new Authenticator {
-          override val authenticatorService = Authenticator.friendlyAuthenticator
-        })
-      assertM(iop, equalTo("hello! tim"))
-    },
-/*
     testM("root request with authentication returns ok") {
       val req1 = Request[withMiddleware.AppTask](Method.GET, uri"/")
       val req = AuthenticationHeaders.addAuthentication(req1, "tim", "friend")
@@ -70,7 +57,6 @@ object TestHello2Service extends  DefaultRunnableSpec(
         .provide(new Authenticator{ override val authenticatorService = Authenticator.friendlyAuthenticator})
       assertM(io.map(_.status), equalTo(Status.Forbidden))
     }
-*/
 
   )
 )
