@@ -37,5 +37,4 @@ trait AuthenticationHeaders[R <: Authenticator] {
 object AuthenticationHeaders {
   def addAuthentication[Tsk[_]](request: Request[Tsk], username: String, password: String): Request[Tsk] =
     request.withHeaders(request.headers.put(Header("Authorization", s"$username $password")))
-
 }

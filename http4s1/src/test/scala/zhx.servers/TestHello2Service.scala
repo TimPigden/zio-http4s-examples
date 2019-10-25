@@ -66,7 +66,7 @@ object Middlewares {
   }
 
   val hello2Service1 = new Hello2Service[Authenticator]
-  // todo - is there a better way to add isNotFound to the middleware service?
+
   val hello2Service = Router[withMiddleware.AppTask](
   ("" -> withMiddleware.authenticationMiddleware(hello2Service1.service)))
     .orNotFound
