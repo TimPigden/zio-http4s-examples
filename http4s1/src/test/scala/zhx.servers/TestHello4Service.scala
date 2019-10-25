@@ -42,7 +42,6 @@ object TestHello4Service extends DefaultRunnableSpec(
 
 object MoreMiddlewares {
   val hello4Service1 = new Hello4Service[Authenticator]
-  // todo - is there a better way to add isNotFound to the middleware service?
   val hello4Service = Router[withMiddleware.AppTask](
     "" -> withMiddleware.authenticationMiddleware(hello4Service1.service))
     .orNotFound

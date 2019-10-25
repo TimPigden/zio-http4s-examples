@@ -63,7 +63,6 @@ object Encoders {
     } catch {
       case e : Exception => Left("parse error in xml")
     }
-
   }
 
   def parseIO[T](s: String)(implicit xmlParser: XmlParser[T]): Task[T] =

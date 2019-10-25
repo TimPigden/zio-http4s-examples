@@ -20,7 +20,6 @@ class Hello4Service[R <: Authenticator] {
   val service = AuthedRoutes.of[AuthToken, AuthenticatorTask] {
     case GET -> Root as authToken => Ok("hello4!")
     case GET -> Root / "president" as authToken => Ok(Person.donald) // uses implicit encoder
-    // todo is there a prettier way to do this?
     case AuthedRequest(authToken, req @ POST -> Root / "ageOf") =>
       req.decode[Person] { m => Ok(m.age.toString)}
   }
