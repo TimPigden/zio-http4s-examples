@@ -34,6 +34,14 @@ lazy val json4s =  "org.json4s" %% "json4s-jackson" % "3.6.6"
 
 lazy val cats = "org.typelevel" %% "cats-core" % "1.6.1"
 lazy val catsEffect =  "org.typelevel" %% "cats-effect" % "2.0.0"
+val commonsIo = "commons-io" % "commons-io" % "2.4"
+val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
+val scalaTest = "org.scalatest" %% "scalatest" % scalaTestVersion % Test
+
+val magnolia = "com.propensive" %% "magnolia" % "0.12.0"
+
+lazy val avro = "org.apache.avro" % "avro" % "1.9.1"
+lazy val snappy = "org.xerial.snappy" % "snappy-java" % "1.1.7.3"
 
 lazy val Http4sVersion = "0.20.10"
 lazy val http4sBlazeServer = "org.http4s"  %% "http4s-blaze-server" % Http4sVersion
@@ -76,6 +84,19 @@ lazy val `http4s1` = (project in file ("http4s1"))
     scalaXml,
     `zio-test`
   ))
+
+lazy val `avro-magnolia` = (project in file ("avro-magnolia"))
+  .settings(commonSettings: _*)
+  .settings(libraryDependencies ++= Seq(
+    commonsIo,
+    logback,
+    scalaTest,
+    json4s,
+    avro,
+    snappy,
+    magnolia,
+  )
+)
 
 lazy val `streams` = (project in file ("streams"))
   .settings(commonSettings: _*)
