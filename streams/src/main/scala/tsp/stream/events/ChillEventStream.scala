@@ -12,6 +12,6 @@ object ChillEventStream {
 
   def generatedStream[S](initialState: S, generator: EventGenerator[S]) =
     ZStream.unfoldM(initialState)(generateOpt(generator))
-    .schedule(Schedule.spaced(Duration.fromScala(10.seconds)))
+    .schedule(Schedule.spaced(Duration.fromScala(1.seconds)))
 
 }

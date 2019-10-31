@@ -33,7 +33,10 @@ object Generators {
   }
 
   def generateOpt[S](eg: EventGenerator[S])(s: S): ZIO[ZEnv, Nothing, Option[(ChillEvent, S)]] =
-    eg.generate(s).map { res => Some(res)}
+    eg.generate(s).map { res =>
+    println(s"generated $res")
+      Some(res)
+    }
 
 
   /**
@@ -54,7 +57,7 @@ object Generators {
   def update(s: SimpleEventState, newTemp: Temperature) =
     now.map { currentTime =>
       val newEvent = s.chillEvent.copy(temperature = s.chillEvent.temperature + newTemp,
-        gps = s.chillEvent.gps.copy(time = currentTime))
+        gps = s.chillEvent.gps.copy(at = currentTime))
       val newState = s.copy(chillEvent = newEvent)
       (newEvent, newState)
     }
