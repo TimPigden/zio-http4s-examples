@@ -1,9 +1,11 @@
 package tsp.stream.events
 
 import tsp.stream.events.Generators._
-import zio.Schedule
+import zio._
+import zio.clock.Clock
 import zio.duration.Duration
 import zio.stream.ZStream
+import Events._
 import scala.concurrent.duration.{Duration => ScalaDuration, _}
 
 
@@ -12,6 +14,16 @@ object ChillEventStream {
 
   def generatedStream[S](initialState: S, generator: EventGenerator[S]) =
     ZStream.unfoldM(initialState)(generateOpt(generator))
-    .schedule(Schedule.spaced(Duration.fromScala(1.seconds)))
+    .schedule(Schedule.spaced(Duration.fromScala(60.seconds)))
+
+  def receivedStream[E](inStream: ZStream[ZEnv with Clock, Nothing, ChillEvent]) =
+    inStream.mapM { ev =>
+      now.map { nw =>
+        val re = ReceivedEvent(ev, nw)
+        println(s"outstream event $re")
+        re
+      }
+    }
+
 
 }

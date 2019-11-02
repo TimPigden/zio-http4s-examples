@@ -28,8 +28,10 @@ object SpeedingUpTime extends DefaultRunnableSpec(
       val stream = myStream.take(30)
       val sink = Sink.collectAll[SimpleEvent]
       for {
-        _ <- Live.withLive(TestClock.adjust(Duration.fromScala(1.seconds)))(_.repeat(Schedule.spaced(Duration.fromScala(10.millis)))).fork
-//        _ <- TestClock.adjust(Duration.fromScala(1.seconds)).repeat(Schedule.recurs(300)).fork
+        _ <- Live.withLive(TestClock.adjust(Duration.fromScala(1.seconds)))(
+          _.repeat(Schedule.spaced(Duration.fromScala(10.millis)))).fork
+//        _ <- TestClock.adjust(Duration.fromScala(1.seconds))
+        //        .repeat(Schedule.recurs(300)).fork
         runner <- stream.run(sink)
       } yield assert(runner.size, equalTo(30))
     }
