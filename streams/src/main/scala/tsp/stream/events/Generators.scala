@@ -2,12 +2,14 @@ package tsp.stream.events
 
 import java.time.Instant
 
-import tsp.stream.events.Events.{ChillEvent, Temperature}
+import tsp.stream.events.Events.{ChillEvent, Event, Temperature}
 import zio._
 import zio.clock.Clock
 import zio.clock.Clock.Live
+import zio.duration.Duration
 import zio.random.Random
-
+import zio.stream.ZStream
+import java.time.{Duration => JDuration}
 /**
  * Collection of things to generate values for the chill event. Used in streams.
  * State contains whatever is necessary to retain for generating the next value
@@ -25,18 +27,29 @@ object Generators {
   def getRandom: ZIO[Random, Nothing, Random.Service[Any]] =
     ZIO.access(_.random)
 
-  /**
-   * typeclass for generating a state S and ChillEvent from a previous state
-   */
-  trait EventGenerator[S] {
-    def generate(s: S): ZIO[ZEnv, Nothing, (ChillEvent, S)]
-  }
+  def randomDouble =
+    for {
+      r <- getRandom
+      f <- r.nextDouble
+    } yield f
 
-  def generateOpt[S](eg: EventGenerator[S])(s: S): ZIO[ZEnv, Nothing, Option[(ChillEvent, S)]] =
-    eg.generate(s).map { res =>
-      Some(res)
+  def randomDuration(lower: JDuration, upper: JDuration) =
+    randomDouble.map { d =>
+      val diff = upper.minus(lower).toMillis
+      val adjusted = (diff * d).toLong
+      lower.plusMillis(adjusted)
     }
 
+  /**
+   * typeclass for generating a state S and an event from a previous state
+   */
+  trait EventGenerator[Evt, S] {
+    def generate(s: S): ZIO[ZEnv, Nothing, Option[(Evt, S)]]
+  }
+
+  def generatedStream[Evt, S](initialState: S, generator: EventGenerator[Evt, S], every: Duration) =
+    ZStream.unfoldM(initialState)(generator.generate)
+      .schedule(Schedule.spaced(every))
 
   /**
    * gets current instant from zio clock (which could be mocked)
@@ -47,50 +60,51 @@ object Generators {
       offs <- clock.currentDateTime
     } yield offs.toInstant
 
-
   /**
-   * for when the only state we need is actually the previous ChillEvent
+   * creates an EventGenerator implementing biased random walk. Note this is not
+   * intended to emulate real refrigeration units - just give us some numbers to play with
+   * @param variation maximum we should change at each tick
+   * @param centre target temperature to which we are biased
+   * @param bias number in range 0 - 1 representing the proportion
+   *             of ticks at which we attempt to move towards the centre
    */
-  case class SimpleEventState(chillEvent: ChillEvent)
-
-  def update(s: SimpleEventState, newTemp: Temperature) =
-    now.map { currentTime =>
-      val newEvent = s.chillEvent.copy(temperature = s.chillEvent.temperature + newTemp, at = currentTime)
-      val newState = s.copy(chillEvent = newEvent)
-      (newEvent, newState)
-    }
-
-  /**
-   * Temperature is a random walk where each step moves us up or down randomly within range
-   * +/- variation
-   */
-  def randomWalkGenerator(variation: Double): EventGenerator[SimpleEventState] = { s =>
-
-    for {
-      random <- getRandom
-      d <- random.nextDouble
-      r = (d * 2 - 1) * variation
-      updated <- update(s, r)
-
-    } yield updated
-  }
-
-  def centeringRandomWalkGenerator(variation: Double, centre: Double, by: Double): EventGenerator[SimpleEventState] = { s =>
+  def centeringRandomWalkGenerator(variation: Double, centre: Double, bias: Double): EventGenerator[ChillEvent, ChillEvent] = { s =>
     for {
       random <- getRandom
       d1a <- random.nextDouble
       d1 = d1a * 2 - 1
       d2 <- random.nextDouble
-      rawAmount = if (d2 < by) {
+      rawAmount = if (d2 < bias) {
         // we want to move towards centre
-        val direction = if (s.chillEvent.temperature > centre) -1 else 1
+        val direction = if (s.temperature > centre) -1 else 1
         Math.abs(d1) * direction
       } else d1
-      //_ = println(s"d1 $d1 d2 $d2 rawAmount $rawAmount")
       adjustedAmount = rawAmount * variation
-      updated <- update(s, adjustedAmount)
-    } yield updated
+      nw <- now // gets the current time from, the clock
+      newEvent = s.copy(temperature = adjustedAmount, at = nw)
+    } yield Some((newEvent, newEvent))
+  }
+
+  case class Delay(amount: JDuration)
+
+  /**
+   * arbitrarily generate delays or reduce arrays already there
+   * @param howOften how often do we actually get delays
+   * @param variation max delay we want to create
+   * @param standardDelay all messages are delayed by a few milliseconds
+   * @param sampleFrequency how frequently our source main stream set is generating events
+   */
+  def delayGenerator(howOften: JDuration, variation: JDuration, standardDelay: JDuration, sampleFrequency: JDuration): EventGenerator[Delay, Delay] = { s =>
+    val newDelay = if (standardDelay.minus(s.amount).isNegative)
+      if (s)
+    for {
+
+
+
+    }
 
   }
+
+
 
 }

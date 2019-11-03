@@ -6,24 +6,21 @@ import zio.clock.Clock
 import zio.duration.Duration
 import zio.stream.ZStream
 import Events._
-import scala.concurrent.duration.{Duration => ScalaDuration, _}
-
+import java.time.{Duration => JDuration}
 
 object ChillEventStream {
   // final def unfoldM[R, E, A, S](s: S)(f0: S => ZIO[R, E, Option[(A, S)]]): ZStream[R, E, A] =
 
-  def generatedStream[S](initialState: S, generator: EventGenerator[S]) =
-    ZStream.unfoldM(initialState)(generateOpt(generator))
-    .schedule(Schedule.spaced(Duration.fromScala(60.seconds)))
+  def generatedStream[Evt, S](initialState: S, generator: EventGenerator[Evt, S], timing: JDuration) =
+    ZStream.unfoldM(initialState)(generator.generate)
+    .schedule(Schedule.spaced(Duration.fromJava(timing)))
 
-  def receivedStream[E](inStream: ZStream[ZEnv with Clock, Nothing, ChillEvent]) =
+  def randomEventDelayStream[Evt <: Event](inStream: ZStream[ZEnv with Clock, Nothing, Evt]) =
     inStream.mapM { ev =>
-      now.map { nw =>
-        val re = ReceivedEvent(ev, nw)
-        println(s"outstream event $re")
-        re
+      randomDuration(JDuration.ofMillis(10), JDuration.ofSeconds(10)).map { d =>
+        val receivedTime = ev.at.plus(d)
+        ReceivedEvent(ev, receivedTime)
       }
     }
-
 
 }
