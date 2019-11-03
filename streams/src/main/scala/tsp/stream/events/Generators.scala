@@ -79,7 +79,7 @@ object Generators {
         val direction = if (s.temperature > centre) -1 else 1
         Math.abs(d1) * direction
       } else d1
-      adjustedAmount = rawAmount * variation
+      adjustedAmount = rawAmount * variation + s.temperature
       nw <- now // gets the current time from, the clock
       newEvent = s.copy(temperature = adjustedAmount, at = nw)
     } yield Some((newEvent, newEvent))
@@ -94,17 +94,30 @@ object Generators {
    * @param standardDelay all messages are delayed by a few milliseconds
    * @param sampleFrequency how frequently our source main stream set is generating events
    */
-  def delayGenerator(howOften: JDuration, variation: JDuration, standardDelay: JDuration, sampleFrequency: JDuration): EventGenerator[Delay, Delay] = { s =>
-    val newDelay = if (standardDelay.minus(s.amount).isNegative)
-      if (s)
-    for {
+  def delayGenerator(howOften: JDuration,
+                     variation: JDuration,
+                     standardDelay: JDuration,
+                     sampleFrequency: JDuration): EventGenerator[Delay, Delay] =
+    new EventGenerator[Delay, Delay] {
+      private val sampleFrequencyMillis = sampleFrequency.toMillis
+      private val howOftenDbl = sampleFrequency.toMillis.toDouble / howOften.toMillis // we will use this to get probability of introducing new delay
+      private val standardDelayMillis = standardDelay.toMillis
 
-
-
+      override def generate(s: Delay): ZIO[zio.ZEnv, Nothing, Option[(Delay, Delay)]] = {
+        val sMillis = s.amount.toMillis
+        val newMillis = if (sMillis > sampleFrequency.toMillis)
+          IO.succeed(JDuration.ofMillis(sMillis - sampleFrequency.toMillis))
+        else if (sMillis > standardDelayMillis)
+          IO.succeed(standardDelay)
+        else for {
+          r <- randomDouble
+          newDelay <- if (r > howOftenDbl) // we don't want a new one
+            IO.succeed(standardDelay)
+          else randomDuration(standardDelay, variation)
+        } yield newDelay
+        newMillis.map { nd =>
+          Some((Delay(nd), Delay(nd)))
+        }
+      }
     }
-
-  }
-
-
-
 }
