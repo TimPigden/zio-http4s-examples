@@ -29,7 +29,7 @@ object SpeedingUpTime extends DefaultRunnableSpec(
       val sink = Sink.collectAll[SimpleEvent]
       for {
         _ <- Live.withLive(TestClock.adjust(Duration.fromScala(1.seconds)))(
-          _.repeat(Schedule.spaced(Duration.fromScala(10.millis)))).fork
+          _.repeat(ZSchedule.spaced(Duration.fromScala(10.millis)))).fork
 //        _ <- TestClock.adjust(Duration.fromScala(1.seconds))
         //        .repeat(Schedule.recurs(300)).fork
         runner <- stream.run(sink)
@@ -49,7 +49,7 @@ object SpeedingUpTimeHelper
       _ <- Live.live(console.putStrLn(s"at $evt"))
     } yield evt
   )
-  .schedule(Schedule.spaced(Duration.fromScala(10.seconds)))
+  .schedule(ZSchedule.spaced(Duration.fromScala(10.seconds)))
 
 }
 
