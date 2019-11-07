@@ -60,6 +60,8 @@ lazy val `zio-test-sbt` = "dev.zio" %% "zio-test-sbt" % `zio-version` % "test"
 lazy val `zio-interop-shared` = "dev.zio" %% "zio-interop-shared" % `zio-version`
 lazy val `zio-interop-cats` = "dev.zio" %% "zio-interop-cats" % `zio-interop`
 
+lazy val embeddedkafka = "io.github.embeddedkafka" %% "embedded-kafka" % "2.3.0" % "test"
+
 
 lazy val commonSettings = Seq(
   parallelExecution in Test := false,
@@ -111,7 +113,8 @@ lazy val `streams` = (project in file ("streams"))
     scalaXml,
     `zio-kafka`,
     `zio-streams`,
-    `zio-test`
+    `zio-test`,
+    embeddedkafka
   ))
 
 
