@@ -1,22 +1,11 @@
 package zhx.client
 
-import cats.effect.Resource
 import org.http4s.client.blaze.BlazeClientBuilder
-import org.http4s._
 import org.http4s.client.Client
-import org.http4s.server.Server
-import zio.{IO, RIO, Runtime, Task, ZIO, ZManaged}
-import zio.test._
-import zio.test.{DefaultRunnableSpec, TestResult, ZSpec, assertM}
+import zio.{Task, ZIO, ZManaged}
+import zio.test.TestResult
 import zio.interop.catz._
-import zio.IO._
-import zio.blocking.Blocking
-import zio.clock.Clock
-import zio.console.Console
 import zio.interop.catz
-import zio.test.Assertion.equalTo
-
-import scala.concurrent.ExecutionContext
 
 object ClientTest {
 
