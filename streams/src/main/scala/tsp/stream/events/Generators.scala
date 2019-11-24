@@ -49,7 +49,7 @@ object Generators {
 
   def generatedStream[Evt, S](initialState: S, generator: EventGenerator[Evt, S], every: Duration) =
     ZStream.unfoldM(initialState)(generator.generate)
-      .schedule(ZSchedule.spaced(every))
+      .schedule(Schedule.spaced(every))
 
   /**
    * gets current instant from zio clock (which could be mocked)

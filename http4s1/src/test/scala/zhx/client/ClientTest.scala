@@ -23,7 +23,7 @@ object ClientTest {
   def testClientM[R](fClient: Client[Task] => Task[TestResult])
   : Task[TestResult] =
     ZIO.runtime[Any].flatMap { implicit rts =>
-      val exec = rts.Platform.executor.asEC
+      val exec = rts.platform.executor.asEC
       BlazeClientBuilder[Task](exec).resource.use { client =>
         fClient(client)
       }
@@ -31,7 +31,7 @@ object ClientTest {
 
   def clientManaged: ZManaged[Any, Throwable, Client[Task]] = {
     val zioManaged = ZIO.runtime[Any].map { rts =>
-      val exec = rts.Platform.executor.asEC
+      val exec = rts.platform.executor.asEC
       implicit def rr = rts
       catz.catsIOResourceSyntax(BlazeClientBuilder[Task](exec).resource).toManaged
     }

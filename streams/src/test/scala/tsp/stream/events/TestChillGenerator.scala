@@ -127,7 +127,7 @@ object Support {
 
   def fastTime(testIntervals: JDuration, liveIntervals: JDuration) =
     Live.withLive(TestClock.adjust(Duration.fromJava(testIntervals)))(
-    _.repeat(ZSchedule.spaced(Duration.fromJava(liveIntervals)))).fork
+    _.repeat(Schedule.spaced(Duration.fromJava(liveIntervals)))).fork
 
 
 }

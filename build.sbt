@@ -49,7 +49,7 @@ lazy val http4sBlazeClient = "org.http4s"  %% "http4s-blaze-client" % Http4sVers
 lazy val http4sDsl = "org.http4s"      %% "http4s-dsl"          % Http4sVersion
 
 
-lazy val `zio-version` = "1.0.0-RC16"
+lazy val `zio-version` = "1.0.0-RC17"
 lazy val `zio-interop` = "2.0.0.0-RC7"
 lazy val `zio-kafka-version` = "0.3.2"
 lazy val zio = "dev.zio" %% "zio" %  `zio-version`
