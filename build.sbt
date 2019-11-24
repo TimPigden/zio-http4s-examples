@@ -50,10 +50,10 @@ lazy val http4sDsl = "org.http4s"      %% "http4s-dsl"          % Http4sVersion
 
 
 lazy val `zio-version` = "1.0.0-RC17"
-lazy val `zio-interop` = "2.0.0.0-RC7"
-lazy val `zio-kafka-version` = "0.3.2"
+lazy val `zio-interop` = "2.0.0.0-RC8"
+lazy val `zio-kafka-version` = "0.4.1"
 lazy val zio = "dev.zio" %% "zio" %  `zio-version`
-lazy val `zio-streams` = "dev.zio" %% "zio-streams" % "1.0.0-RC15"
+lazy val `zio-streams` = "dev.zio" %% "zio-streams" % `zio-version`
 lazy val `zio-kafka` = "dev.zio" %% "zio-kafka"   % `zio-kafka-version`
 lazy val `zio-test` = "dev.zio" %% "zio-test" % `zio-version` % "test"
 lazy val `zio-test-sbt` = "dev.zio" %% "zio-test-sbt" % `zio-version` % "test"

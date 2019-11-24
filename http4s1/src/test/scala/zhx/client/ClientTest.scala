@@ -5,7 +5,7 @@ import org.http4s.client.blaze.BlazeClientBuilder
 import org.http4s._
 import org.http4s.client.Client
 import org.http4s.server.Server
-import zio.{IO, RIO, Runtime, Task, ZIO, ZManaged}
+import zio.{Cause, IO, RIO, Runtime, Task, ZIO, ZManaged}
 import zio.test._
 import zio.test.{DefaultRunnableSpec, TestResult, ZSpec, assertM}
 import zio.interop.catz._
@@ -29,7 +29,7 @@ object ClientTest {
       }
     }
 
-  def clientManaged: ZManaged[Any, Throwable, Client[Task]] = {
+  def clientManaged = {
     val zioManaged = ZIO.runtime[Any].map { rts =>
       val exec = rts.platform.executor.asEC
       implicit def rr = rts
@@ -39,6 +39,6 @@ object ClientTest {
     // that we create a Managed of the ZIO and then flatten it
     val mgr = zioManaged.toManaged_ // toManaged_ provides an empty release of the rescoure
     mgr.flatten
-  }
+  }.mapErrorCause(cause => Cause.fail(TestFailure.Runtime(cause)))
 
 }
