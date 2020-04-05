@@ -1,10 +1,12 @@
 package zhx.auth
 
 import zhx.auth.Authenticator.AuthenticationError
-import zio.{IO, Task, ZIO}
-
+import zio._
+import Authenticator._
 // first test of https middleware
 object Authenticator {
+
+  type Authenticator = Has[Service]
 
   case class AuthToken(tok: String)
 
@@ -24,12 +26,12 @@ object Authenticator {
       case _ => IO.fail(authenticationError)
     }
   }
+
+  val friendly = ZLayer.succeed(friendlyAuthenticator)
 }
 
-trait Authenticator { def authenticatorService: Authenticator.Service }
-
 package object authenticator {
-  def authenticatorService: ZIO[Authenticator, AuthenticationError, Authenticator.Service] = ZIO.accessM(x => ZIO.succeed(x.authenticatorService))
+  def authenticator: URIO[Authenticator, Authenticator.Service] = ZIO.access(_.get)
 }
 
 

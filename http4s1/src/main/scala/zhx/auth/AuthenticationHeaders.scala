@@ -4,7 +4,7 @@ import org.http4s.{Header, Request}
 import org.http4s.headers.Authorization
 import zhx.auth.Authenticator.AuthToken
 import zio.{IO, RIO, Task}
-
+import Authenticator._
 /**
  * The purpose of this is to extract authentication headers from the request
  * It can also be used as a blueprint for other stuff that needs extraction.
@@ -24,7 +24,7 @@ trait AuthenticationHeaders[R <: Authenticator] {
       } yield asSplit
     val tok = userNamePasswordOpt.map { asSplit =>
       val res1 = for {
-        authentic <- authenticator.authenticatorService
+        authentic <- authenticator.authenticator
         tok  <- authentic.authenticate(asSplit(0), asSplit(1))
       } yield tok
       res1.either

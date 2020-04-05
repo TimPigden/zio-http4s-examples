@@ -10,32 +10,30 @@ import zio.test.environment._
 import cats.implicits._
 import zio.test.Assertion._
 import org.http4s.server.Router
+import zhx.auth.Authenticator.Authenticator
 import zio.IO
-object TestHello2Service extends  DefaultRunnableSpec(
+object TestHello2Service extends  DefaultRunnableSpec {
 
-  suite("routes suite") (
+  override def spec = suite("routes suite")(
 
     testM("root request returns forbidden") {
       val io = hello2Service.run(Request[withMiddleware.AppTask](Method.GET, uri"/"))
-        .provide(new Authenticator{ override val authenticatorService = Authenticator.friendlyAuthenticator})
-      assertM(io.map(_.status),
+      assertM(io.map(_.status))(
         equalTo(Status.Forbidden)) // will fail if nothing there
     },
 
     testM("root request with authentication returns ok") {
       val req1 = Request[withMiddleware.AppTask](Method.GET, uri"/")
       val req = AuthenticationHeaders.addAuthentication(req1, "tim", "friend")
-      val io = hello2Service.run(req)
-        .provide(new Authenticator{ override val authenticatorService = Authenticator.friendlyAuthenticator})
-      assertM(io.map(_.status), equalTo(Status.Ok)) // will fail if nothing there
+      val io = hello2Service.run(req).provideCustomLayer(Authenticator.friendly)
+      assertM(io.map(_.status))(equalTo(Status.Ok)) // will fail if nothing there
     }
     ,
     testM("unmapped request returns not found") {
       val req1 = Request[withMiddleware.AppTask](Method.GET, uri"/a")
       val req = AuthenticationHeaders.addAuthentication(req1, "tim", "friend")
       val io = hello2Service.run(req)
-        .provide(new Authenticator{ override val authenticatorService = Authenticator.friendlyAuthenticator})
-      assertM(io.map(_.status), equalTo(Status.NotFound))
+      assertM(io.map(_.status))(equalTo(Status.NotFound))
     }
     ,
     testM("root request body returns hello!") {
@@ -46,20 +44,19 @@ object TestHello2Service extends  DefaultRunnableSpec(
         request <- io
         body <- request.body.compile.toVector.map(x => x.map(_.toChar).mkString(""))
       } yield body)
-        .provide(new Authenticator{ override val authenticatorService = Authenticator.friendlyAuthenticator})
-      assertM(iop, equalTo("hello! tim"))
+      assertM(iop)(equalTo("hello! tim"))
     }
     ,
     testM("bad password gives forbidden") {
       val req1 = Request[withMiddleware.AppTask](Method.GET, uri"/")
       val req = AuthenticationHeaders.addAuthentication(req1, "tim", "frond")
-      val io = hello2Service.run(req)
-        .provide(new Authenticator{ override val authenticatorService = Authenticator.friendlyAuthenticator})
-      assertM(io.map(_.status), equalTo(Status.Forbidden))
+      val io = hello2Service.run(req).provideCustomLayer(Authenticator.friendly)
+      assertM(io.map(_.status))(equalTo(Status.Forbidden))
     }
 
-  )
-)
+  ).provideCustomLayerShared(Authenticator.friendly)
+}
+
 object Middlewares {
   val withMiddleware = new AuthenticationMiddleware {
     override type AppEnvironment = Authenticator

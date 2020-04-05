@@ -8,38 +8,34 @@ import zio.test._
 import zio.test.Assertion._
 
 import scala.concurrent.duration.{Duration => ScalaDuration, _}
-import SpeedingUpTimeHelper._
 import zio.clock.Clock
 import zio.duration.Duration
 import zio.test.environment.{Live, TestClock, TestEnvironment}
 
-object SpeedingUpTime extends DefaultRunnableSpec(
-  suite("timings")(
-/*    testM("sepaate ticker"){
+object SpeedingUpTime extends DefaultRunnableSpec {
+  override def spec =   suite("timings")(
+    /*    testM("sepaate ticker"){
       val stream = myStream.take(30)
       val sink = Sink.collectAll[SimpleEvent]
       for {
         runner <- stream.run(sink)
-      } yield assert(runner.size, equalTo(30))
+      } yield assert(runner.size)(equalTo(30))
     }
   ),*/
 
-    testM("sepaate ticker"){
+    testM("sepaate ticker") {
       val stream = myStream.take(30)
       val sink = Sink.collectAll[SimpleEvent]
       for {
         _ <- Live.withLive(TestClock.adjust(Duration.fromScala(1.seconds)))(
           _.repeat(Schedule.spaced(Duration.fromScala(10.millis)))).fork
-//        _ <- TestClock.adjust(Duration.fromScala(1.seconds))
+        //        _ <- TestClock.adjust(Duration.fromScala(1.seconds))
         //        .repeat(Schedule.recurs(300)).fork
         runner <- stream.run(sink)
-      } yield assert(runner.size, equalTo(30))
+      } yield assert(runner.size)(equalTo(30))
     }
   )
-)
 
-object SpeedingUpTimeHelper
-{
   case class SimpleEvent(at: Instant)
 
   def myStream = ZStream.repeatEffect(

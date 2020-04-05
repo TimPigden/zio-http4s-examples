@@ -6,6 +6,7 @@ import org.http4s.implicits._
 import org.http4s.server.Router
 import org.http4s.server.blaze.BlazeServerBuilder
 import zhx.auth.Authenticator
+import Authenticator._
 import zio._
 import zio.blocking.Blocking
 import zio.clock.Clock
@@ -36,14 +37,7 @@ object Hello2 extends App with AuthenticationMiddleware {
           .drain
     }
 
-  val server = server1
-    .provideSome[ZEnv] { base =>
-      new  Authenticator with Clock {
-        override val clock: Clock.Service[Any] = base.clock
-
-        override def authenticatorService: Authenticator.Service = Authenticator.friendlyAuthenticator
-      }
-    }
+  val server = server1.provideCustomLayer(friendly)
 
   def run(args: List[String]): ZIO[ZEnv, Nothing, Int] =
     server.foldM(err => putStrLn(s"execution failed with $err") *> ZIO.succeed(1), _ => ZIO.succeed(0))

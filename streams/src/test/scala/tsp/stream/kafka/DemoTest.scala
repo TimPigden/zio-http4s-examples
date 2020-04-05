@@ -12,7 +12,7 @@ object DemoTest extends DefaultRunnableSpec (
     testM("random walk"){
 
 
-      IO.succeed(assert(true, equalTo(true)))
+      IO.succeed(assert(true)(equalTo(true)))
     }
    )
 )

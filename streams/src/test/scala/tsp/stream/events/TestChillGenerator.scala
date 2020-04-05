@@ -9,12 +9,10 @@ import zio.duration.Duration
 import zio.stream.{Sink, ZStream}
 import zio.test.environment.{Live, TestClock, TestEnvironment}
 import java.time.{Instant, Duration => JDuration}
+  
+object TestChillGenerator extends DefaultRunnableSpec {
 
-import Support._
-
-object TestChillGenerator extends DefaultRunnableSpec (
-
-  suite("test emitting stream")(
+  override def spec = suite("test emitting stream")(
     testM("random walk"){
       for {
         nw <- Generators.now // utility method gets current time as instant from Clock
@@ -26,22 +24,22 @@ object TestChillGenerator extends DefaultRunnableSpec (
         runner <- stream.run(sink)
         _ <- Live.live(console.putStrLn(s"${runner.mkString("\n")}"))
       } yield {
-        assert(runner.size, equalTo(200))
+        assert(runner.size)(equalTo(200))
       }
     }
   ,
   testM("stream received works"){
     for {
-      initialState <- Support.initialiseVehicle(1)
+      initialState <- initialiseVehicle(1)
       _ <- fastTime(JDuration.ofSeconds(10), JDuration.ofMillis(20))
 
-      stream1 = EventStreams.generatedStream(initialState, Support.randomWalker, JDuration.ofSeconds(60)).take(20)
+      stream1 = EventStreams.generatedStream(initialState, randomWalker, JDuration.ofSeconds(60)).take(20)
       stream = EventStreams.randomEventDelayStream(stream1)
       sink = Sink.collectAll[ReceivedEvent[ChillEvent]]
       runner <- stream.run(sink)
       _ <- Live.live(console.putStrLn(s"${runner.mkString("\n")}"))
     } yield {
-      assert(runner.size, equalTo(20))
+      assert(runner.size)(equalTo(20))
     }
   },
 
@@ -58,7 +56,7 @@ object TestChillGenerator extends DefaultRunnableSpec (
         runner <- delays.run(sink)
         _ <- Live.live(console.putStrLn(s"${runner.mkString("\n")}"))
       } yield {
-        assert(runner.size, equalTo(200))
+        assert(runner.size)(equalTo(200))
       }
     },
     testM("run delayed chills"){
@@ -71,7 +69,7 @@ object TestChillGenerator extends DefaultRunnableSpec (
       val delays = ZStream.unfoldM(initialDelay)(delayer.generate)
       for {
         _ <- fastTime(JDuration.ofSeconds(10), JDuration.ofMillis(5))
-        initialChill <- Support.initialiseVehicle(1)
+        initialChill <- initialiseVehicle(1)
         randomWalker = Generators.centeringRandomWalkGenerator(1, -10, 0.1)
         chillStream = EventStreams.generatedStream(initialChill, randomWalker, JDuration.ofSeconds(20))
         receivedEvents = delays.zip(chillStream).map { pair =>
@@ -81,7 +79,7 @@ object TestChillGenerator extends DefaultRunnableSpec (
         runner <- receivedEvents.run(sink)
         _ <- Live.live(console.putStrLn(s"${runner.mkString("\n")}"))
       } yield {
-        assert(runner.size, equalTo(200))
+        assert(runner.size)(equalTo(200))
       }
     },
 
@@ -112,13 +110,11 @@ object TestChillGenerator extends DefaultRunnableSpec (
         runner <- combined.take(2000).run(sink)
         _ <- Live.live(console.putStrLn(s"${runner.mkString("\n")}"))
       } yield {
-        assert(runner.size, equalTo(2000))
+        assert(runner.size)(equalTo(2000))
       }
     }
   )
-)
 
-object Support {
   val randomWalker: EventGenerator[ChillEvent, ChillEvent] = Generators.centeringRandomWalkGenerator(1, -10, 0.1)
 
   def initialiseVehicle(i: Int) =

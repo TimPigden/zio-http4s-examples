@@ -6,6 +6,7 @@ import org.http4s.dsl.Http4sDsl
 import org.http4s.server.AuthMiddleware
 import zhx.auth.Authenticator.AuthToken
 import zhx.auth.{AuthenticationHeaders, Authenticator}
+import Authenticator._
 import zio._
 import zio.interop.catz._
 
