@@ -6,6 +6,7 @@ import zio.test.Assertion.equalTo
 import zio.test._
 import zio.{Task, ZIO}
 import org.http4s.implicits._
+import TestAspect._
 
 object TestHello1ManagedShared extends DefaultRunnableSpec {
 
@@ -17,6 +18,7 @@ object TestHello1ManagedShared extends DefaultRunnableSpec {
         asserted <- assertM(client.status(req))(equalTo(Status.Ok))
       } yield asserted
     }
-  ).provideCustomLayerShared(ClientTest.clientLive).mapError(TestFailure.fail)
+  ).provideCustomLayerShared(ClientTest.clientLive).mapError(TestFailure.fail)  @@ sequential
+
 
 }

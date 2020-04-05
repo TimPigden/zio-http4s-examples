@@ -22,14 +22,10 @@ trait AuthenticationHeaders[R <: Authenticator] {
         asSplit = auth.split(" ")
         if asSplit.size == 2
       } yield asSplit
-    val tok = userNamePasswordOpt.map { asSplit =>
-      val res1 = for {
-        authentic <- authenticator.authenticator
-        tok  <- authentic.authenticate(asSplit(0), asSplit(1))
-      } yield tok
-      res1.either
-    }
-    tok.getOrElse(unauthenticated)
+    userNamePasswordOpt.map { asSplit =>
+      val tok = authenticator.authenticate(asSplit(0), asSplit(1))
+      tok.either
+    }.getOrElse(unauthenticated)
   }
 
 }

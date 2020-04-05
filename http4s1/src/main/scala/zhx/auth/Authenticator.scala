@@ -31,7 +31,8 @@ object Authenticator {
 }
 
 package object authenticator {
-  def authenticator: URIO[Authenticator, Authenticator.Service] = ZIO.access(_.get)
+  def authenticate(userName: String, password: String): RIO[Authenticator, AuthToken]
+  = ZIO.accessM[Authenticator](_.get.authenticate(userName, password))
 }
 
 
