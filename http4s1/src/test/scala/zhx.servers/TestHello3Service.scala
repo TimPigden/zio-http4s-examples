@@ -6,6 +6,7 @@ import zio._
 import zio.interop.catz._
 import zio.test._
 import zio.test.Assertion._
+import org.http4s.implicits._
 
 object TestHello3Service extends DefaultRunnableSpec {
   override def spec = suite("routes suite")(

@@ -5,6 +5,7 @@ import org.http4s.client.Client
 import zio.test.Assertion.equalTo
 import zio.test._
 import zio.{Task, ZIO}
+import org.http4s.implicits._
 
 object TestHello1ManagedShared extends DefaultRunnableSpec {
 

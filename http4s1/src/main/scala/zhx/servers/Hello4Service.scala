@@ -1,6 +1,6 @@
 package zhx.servers
 
-import org.http4s.{AuthedRequest, AuthedRoutes}
+import org.http4s.{AuthedRequest, AuthedRoutes, ContextRequest}
 import org.http4s.dsl.Http4sDsl
 import zhx.auth.Authenticator
 import zhx.auth.Authenticator._
@@ -20,7 +20,7 @@ class Hello4Service[R <: Authenticator] {
   val service = AuthedRoutes.of[AuthToken, AuthenticatorTask] {
     case GET -> Root as authToken => Ok("hello4!")
     case GET -> Root / "president" as authToken => Ok(Person.donald) // uses implicit encoder
-    case AuthedRequest(authToken, req @ POST -> Root / "ageOf") =>
+    case ContextRequest(authToken, req @ POST -> Root / "ageOf") =>
       req.decode[Person] { m => Ok(m.age.toString)}
   }
 

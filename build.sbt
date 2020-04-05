@@ -42,7 +42,7 @@ val magnolia = "com.propensive" %% "magnolia" % "0.12.0"
 lazy val avro = "org.apache.avro" % "avro" % "1.9.1"
 lazy val snappy = "org.xerial.snappy" % "snappy-java" % "1.1.7.3"
 
-lazy val Http4sVersion = "0.20.21"
+lazy val Http4sVersion = "0.21.3"
 lazy val http4sBlazeServer = "org.http4s"  %% "http4s-blaze-server" % Http4sVersion
 lazy val http4sBlazeClient = "org.http4s"  %% "http4s-blaze-client" % Http4sVersion
 lazy val http4sDsl = "org.http4s"      %% "http4s-dsl"          % Http4sVersion
