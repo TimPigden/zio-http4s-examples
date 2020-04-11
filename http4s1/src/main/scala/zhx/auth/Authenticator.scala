@@ -3,7 +3,8 @@ package zhx.auth
 import zhx.auth.Authenticator.AuthenticationError
 import zio._
 import Authenticator._
-// first test of https middleware
+
+
 object Authenticator {
 
   type Authenticator = Has[Service]

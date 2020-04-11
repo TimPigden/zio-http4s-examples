@@ -4,6 +4,7 @@ ideatarget
 bin
 .cache
 .cache-main
+.bloop
 .cache-tests
 .classpath
 .ensime

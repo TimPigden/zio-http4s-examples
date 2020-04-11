@@ -60,6 +60,10 @@ lazy val `zio-test-sbt` = "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
 lazy val `zio-interop-shared` = "dev.zio" %% "zio-interop-shared" % zioVersion
 lazy val `zio-interop-cats` = "dev.zio" %% "zio-interop-cats" % `zio-interop`
 
+val uzhttp = "org.polynote" %% "uzhttp" % "0.1.3"
+val sttp = "com.softwaremill.sttp.client" %% "core" % "2.0.7"
+val sttpzio  = "com.softwaremill.sttp.client" %% "async-http-client-backend-zio" % "2.0.7"
+
 
 lazy val commonSettings = Seq(
   parallelExecution in Test := false,
@@ -87,6 +91,19 @@ lazy val `http4s1` = (project in file ("http4s1"))
     scalaXml,
     `zio-test`
   ))
+
+lazy val `uzsttp` = (project in file ("uzsttp"))
+  .settings(commonSettings: _*)
+  .settings(libraryDependencies ++= Seq(
+    uzhttp,
+    `zio-streams`,
+    sttp,
+    sttpzio,
+    catsEffect,
+    scalaXml,
+    `zio-test`
+  ))
+
 
   /*
 lazy val `avro-magnolia` = (project in file ("avro-magnolia"))
