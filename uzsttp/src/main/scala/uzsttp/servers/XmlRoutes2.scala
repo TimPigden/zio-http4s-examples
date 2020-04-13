@@ -24,5 +24,10 @@ object  XmlRoutes2 {
     person <- parsedXmlBody[Person]
   } yield Response.plain(person.name)
 
-  val routes = combineRoutes(president, contender, whatIsMyName)
+  // this version better if many routes - combineRoutes folds over the arguments
+  // val routes = combineRoutes(president, contender, whatIsMyName)
+
+  // this version illustrates new orElseOption syntax nicely
+  val routes = president orElseOptional  contender orElseOptional whatIsMyName
+
 }
