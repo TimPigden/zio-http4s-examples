@@ -10,18 +10,17 @@ import Encoders._
 
 object XmlRoutes {
   val routes: PartialFunction[Request, IO[HTTPError, Response]] = {
-    case req if (req.uri.getPath.startsWith("/president")) && (req.method === Method.GET) =>
+    case req if (req.uri.getPath === "/president") && (req.method === Method.GET) =>
       IO.succeed(
         writeXmlBody(Person.donald)
       )
-    case req if (req.uri.getPath.startsWith("/whatIsMyName")) && (req.method === Method.POST) =>
+    case req if (req.uri.getPath === "/whatIsMyName") && (req.method === Method.POST) =>
       extractXmlBody[Person](req).map{ p =>
         Response.plain(p.name)
       }
-    case req if (req.uri.getPath.startsWith("/contender")) && (req.method === Method.GET) =>
+    case req if (req.uri.getPath === "/contender") && (req.method === Method.GET) =>
       IO.succeed(
         writeXmlBody(Person.joe)
       )
-
   }
 }

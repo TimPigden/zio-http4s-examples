@@ -11,6 +11,8 @@ import uzhttp.HTTPError.BadRequest
 import zio.stream.{Take, ZSink, ZStream}
 import Response._
 import sttp.client.HttpError
+import uzsttp.servers.Processor.HRequest
+import uzsttp.servers.hrequest
 
 object Encoders {
 
@@ -60,6 +62,15 @@ object Encoders {
       _ = println(s"extracted string body $s")
       t <- parseXmlString(s)(xmlParser).mapError(e => BadRequest(e.getMessage))
     } yield t
+
+  def parsedXmlBody[T](implicit xmlParser: XmlParser[T]) =
+    (for {
+      s <- hrequest.stringBody
+      _ = println(s"extracted string body $s")
+      t <- parseXmlString(s)(xmlParser).mapError(e => BadRequest(e.getMessage))
+    } yield t).mapError(e => Some(e)) // to make it play neatly with our Option[E] chain
+
+
 
   def writeXmlString[T](t: T)(implicit xmlWriter: XmlWriter[T]) = {
     // extravagently spaced pretty version for ease of debugging 

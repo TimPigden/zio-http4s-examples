@@ -15,9 +15,11 @@ import uzhttp.server.Server
 import java.net.InetSocketAddress
 
 import uzsttp.auth.Authorizer
-import uzsttp.auth.Authorizer.{AuthInfo, Authorizer}
+import uzsttp.auth.Authorizer.{Auth, AuthInfo, Authorizer}
+import uzsttp.servers.Processor.{HRequest, Processor}
 import zio.blocking.Blocking
 import zio.clock.Clock
+import Processor._
 
 object TestUtil {
 
@@ -25,6 +27,12 @@ object TestUtil {
     Server.builder(new InetSocketAddress("127.0.0.1", 8080))
   .handleSome(handler)
   .serve
+  )
+
+  def serverLayer2(p: Processor[HRequest]) = ZLayer.fromManaged(
+    Server.builder(new InetSocketAddress("127.0.0.1", 8080))
+      .handleAll(noAuthHandler(p))
+      .serve
   )
 
   def serverLayerM[R](handlerM: RIO[R, PartialFunction[Request, IO[HTTPError, Response]]]) =
@@ -40,6 +48,15 @@ object TestUtil {
   def authLayer(handler: PartialFunction[(Request, AuthInfo), IO[HTTPError, Response]]):
     ZLayer[Blocking with Clock with Authorizer, Throwable, Has[Server]] =
     serverLayerM[Authorizer](Authorizer.authorized(handler))
+
+  def authLayer2(p: Processor[HRequest with Auth]) = ZLayer.fromManaged {
+    val zm = authHandler(p).map { ah =>
+      Server.builder(new InetSocketAddress("127.0.0.1", 8080))
+        .handleAll(ah)
+        .serve
+    }
+    ZManaged.unwrap(zm)
+  }
 
   type UZServer = Has[Server]
 

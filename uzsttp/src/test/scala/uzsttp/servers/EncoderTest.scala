@@ -6,6 +6,7 @@ import zio._
 import zio.test._
 import Assertion._
 import TestUtil._
+import zio.test.environment._
 import uzsttp.auth.Authorizer
 import zio.blocking.Blocking
 import zio.clock.Clock
@@ -42,11 +43,23 @@ object EncoderTest extends DefaultRunnableSpec {
     } yield assert(response.code)(equalTo(StatusCode.BadRequest))
   }
 
-
-  override def spec = suite("all tests")(
+  val withPartialFunction = suite("all tests using partial function")(
     hasDonald,
     isJoe,
     badBodyJoe
-  ).provideCustomLayerShared(AsyncHttpClientZioBackend.layer() ++ serverLayer(XmlRoutes.routes)).mapError(TestFailure.fail)
+  ).provideSomeLayerShared[TestEnvironment with SttpClient](serverLayer(XmlRoutes.routes))
+
+  val withProcessor = suite("all tests using processor")(
+    hasDonald,
+    isJoe,
+    badBodyJoe
+  ).provideSomeLayerShared[TestEnvironment with SttpClient](serverLayer2(XmlRoutes2.routes))
+
+
+  override def spec = suite("both methods")(
+    withPartialFunction,
+    withProcessor
+  ).provideCustomLayer(AsyncHttpClientZioBackend.layer()).mapError(TestFailure.fail)
+
 
 }

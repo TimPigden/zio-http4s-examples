@@ -9,6 +9,8 @@ object Authorizer {
 
   type Authorizer = Has[Service]
 
+  type Auth = Has[AuthInfo]
+
   case class AuthInfo(status: String)
 
   object AuthInfo {
@@ -62,4 +64,8 @@ object Authorizer {
 package object authorizer {
   def authorize(accessToken: AccessToken): RIO[Authorizer, AuthInfo]
   = ZIO.accessM[Authorizer](_.get.authorize(accessToken))
+}
+
+package object auth {
+  def status = ZIO.access[Auth](_.get.status)
 }

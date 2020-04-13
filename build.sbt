@@ -8,7 +8,8 @@ resolvers += Resolver.sonatypeRepo("releases")
 inThisBuild(Seq(
   version := "0.7",
   isSnapshot := true,
-  scalaVersion := "2.12.11"
+  scalaVersion := "2.12.11",
+  resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 ))
 
 lazy val myScalacOptions = Seq(
@@ -49,8 +50,7 @@ lazy val http4sDsl = "org.http4s"      %% "http4s-dsl"          % Http4sVersion
 
 
 // lazy val `zio-kafka-version` = "0.4.1+34-69f19fa2+20191205-1812"
-lazy val zioVersion = "1.0.0-RC18-2"
-lazy val `zio-interop` = "2.0.0.0-RC12"
+lazy val zioVersion = "1.0.0-RC18-2+147-6dcf6568-SNAPSHOT"
 
 lazy val zio = "dev.zio" %% "zio" %  zioVersion
 lazy val `zio-streams` = "dev.zio" %% "zio-streams" % zioVersion
@@ -58,7 +58,7 @@ lazy val `zio-streams` = "dev.zio" %% "zio-streams" % zioVersion
 lazy val `zio-test` = "dev.zio" %% "zio-test" % zioVersion % "test"
 lazy val `zio-test-sbt` = "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
 lazy val `zio-interop-shared` = "dev.zio" %% "zio-interop-shared" % zioVersion
-lazy val `zio-interop-cats` = "dev.zio" %% "zio-interop-cats" % `zio-interop`
+// lazy val `zio-interop-cats` = "dev.zio" %% "zio-interop-cats" % `zio-interop`
 
 val uzhttp = "org.polynote" %% "uzhttp" % "0.1.3"
 val sttp = "com.softwaremill.sttp.client" %% "core" % "2.0.7"
@@ -74,13 +74,14 @@ lazy val commonSettings = Seq(
   exportJars := true,
   updateOptions := updateOptions.value.withCachedResolution(true),
   libraryDependencies ++= Seq(
-    `zio-interop-cats`,
+//    `zio-interop-cats`,
     zio,
     `zio-test`,
     `zio-test-sbt`
   )
 )
 
+/*
 lazy val `http4s1` = (project in file ("http4s1"))
   .settings(commonSettings: _*)
   .settings(libraryDependencies ++= Seq(
@@ -91,6 +92,7 @@ lazy val `http4s1` = (project in file ("http4s1"))
     scalaXml,
     `zio-test`
   ))
+*/
 
 lazy val `uzsttp` = (project in file ("uzsttp"))
   .settings(commonSettings: _*)
