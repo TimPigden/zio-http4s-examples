@@ -1,6 +1,6 @@
 package uzsttp.servers
 
-import uzhttp.Request.Method
+import uzhttp.Request.{Method, WebsocketRequest}
 import uzhttp.{HTTPError, Request, Response}
 import zio._
 import uzsttp.auth.Authorizer._
@@ -12,8 +12,10 @@ import sttp.model.Uri
 import sttp.model.Uri.PathSegment
 import uzhttp.HTTPError.{BadRequest, Forbidden, NotFound, Unauthorized}
 import uzsttp.auth.{auth, authorizer}
-import zio.stream.ZSink
+import zio.stream._
 import hrequest._
+import sttp.client.HttpError
+import uzhttp.websocket._
 
 object Processor {
   type HRequest = Has[Request]
@@ -97,4 +99,27 @@ package object hrequest {
       case None => ZIO.fail(BadRequest("Missing body"))
     }
   } yield s
+
+  def webSocket: ZIO[HRequest, HTTPError, WebsocketRequest] =
+    for {
+      r <- request
+      ws <- r match {
+        case wr: WebsocketRequest => IO.succeed(wr)
+        case x => IO.fail(BadRequest("not a websocket"))
+      }
+    } yield ws
+
+  def handleWebsocketFrame(textHandler: String => IO[HTTPError, Frame])
+                          (frame: Frame): UIO[Stream[HTTPError, Take[Nothing, Frame]]] = frame match {
+    case frame@Binary(data, _)       => UIO.succeed(Stream.empty)
+    case frame@Text(data, _)         => textHandler(data)
+        .either.map {
+          case Left(err) => Stream.fail(err)
+          case Right(f) => Stream(Take.Value(f))
+    }
+    case frame@Continuation(data, _) => UIO.succeed(Stream.empty)
+    case Ping => UIO(Stream(Take.Value(Pong)))
+    case Pong => UIO(Stream.empty)
+    case Close => UIO(Stream(Take.Value(Close), Take.End))
+  }
 }

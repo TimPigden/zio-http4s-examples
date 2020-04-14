@@ -63,6 +63,7 @@ lazy val `zio-interop-shared` = "dev.zio" %% "zio-interop-shared" % zioVersion
 val uzhttp = "org.polynote" %% "uzhttp" % "0.1.3"
 val sttp = "com.softwaremill.sttp.client" %% "core" % "2.0.7"
 val sttpzio  = "com.softwaremill.sttp.client" %% "async-http-client-backend-zio" % "2.0.7"
+val sttpziostreams  = "com.softwaremill.sttp.client" %% "async-http-client-backend-zio-streams" % "2.0.7"
 
 
 lazy val commonSettings = Seq(
@@ -101,6 +102,7 @@ lazy val `uzsttp` = (project in file ("uzsttp"))
     `zio-streams`,
     sttp,
     sttpzio,
+//    sttpziostreams,
     catsEffect,
     scalaXml,
     `zio-test`

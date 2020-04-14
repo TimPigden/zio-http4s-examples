@@ -2,13 +2,9 @@ package uzsttp.servers
 import sttp.client._
 import sttp.model.StatusCode
 import sttp.client.asynchttpclient.zio.{AsyncHttpClientZioBackend, SttpClient}
-import zio._
 import zio.test._
 import Assertion._
 import TestUtil._
-import uzsttp.auth.Authorizer
-import zio.blocking.Blocking
-import zio.clock.Clock
 
 object HelloServerTest extends DefaultRunnableSpec {
 
