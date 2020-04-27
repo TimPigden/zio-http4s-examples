@@ -11,7 +11,7 @@ import uzhttp.HTTPError.BadRequest
 import zio.stream.{Take, ZSink, ZStream}
 import Response._
 import sttp.client.HttpError
-import uzsttp.servers.Processor.HRequest
+import uzsttp.servers.EndPoint.HRequest
 import uzsttp.servers.hrequest
 
 object Encoders {

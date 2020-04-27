@@ -10,13 +10,14 @@ import uzsttp.auth.Authorizer
 import zio.blocking.Blocking
 import zio.clock.Clock
 import zio.test.environment.TestEnvironment
+import TestAspect._
 
 object AuthServerTest extends DefaultRunnableSpec {
 
   override def spec = suite("all tests")(
     testAuth,
     testAuthProcessor
-  ).provideCustomLayer(AsyncHttpClientZioBackend.layer()).mapError(TestFailure.fail)
+  ).provideCustomLayer(AsyncHttpClientZioBackend.layer()).mapError(TestFailure.fail)  @@ sequential
 
   val noAuthentication = testM("root request with no authentication returns Unauthorized") {
     for {

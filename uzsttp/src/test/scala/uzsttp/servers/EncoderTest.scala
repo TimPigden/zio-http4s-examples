@@ -12,6 +12,7 @@ import zio.blocking.Blocking
 import zio.clock.Clock
 import uzsttp.encoding.Encoders._
 import Person._
+import TestAspect._
 
 object EncoderTest extends DefaultRunnableSpec {
 
@@ -49,17 +50,8 @@ object EncoderTest extends DefaultRunnableSpec {
     badBodyJoe
   ).provideSomeLayerShared[TestEnvironment with SttpClient](serverLayer(XmlRoutes.routes))
 
-  val withProcessor = suite("all tests using processor")(
-    hasDonald,
-    isJoe,
-    badBodyJoe
-  ).provideSomeLayerShared[TestEnvironment with SttpClient](serverLayer2(XmlRoutes2.routes))
 
-
-  override def spec = suite("both methods")(
-    withPartialFunction,
-    withProcessor
-  ).provideCustomLayer(AsyncHttpClientZioBackend.layer()).mapError(TestFailure.fail)
+  override def spec = withPartialFunction.provideCustomLayer(AsyncHttpClientZioBackend.layer()).mapError(TestFailure.fail)
 
 
 }

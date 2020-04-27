@@ -1,6 +1,6 @@
 package uzsttp.servers
 
-import Processor._
+import EndPoint._
 import cats.data.NonEmptyList
 import hrequest._
 import uzhttp.Request.Method
@@ -25,9 +25,9 @@ object  XmlRoutes2 {
   } yield Response.plain(person.name)
 
   // this version better if many routes - combineRoutes folds over the arguments
-  // val routes = combineRoutes(president, contender, whatIsMyName)
+  val routes = combineRoutes(president, contender, whatIsMyName)
 
   // this version illustrates new orElseOption syntax nicely
-  val routes = president orElseOptional  contender orElseOptional whatIsMyName
+  //val routes = president orElseOptional  contender orElseOptional whatIsMyName
 
 }

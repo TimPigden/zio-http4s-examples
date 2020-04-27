@@ -5,7 +5,7 @@ import Request._
 import uzsttp.auth.Authorizer.AuthInfo
 import cats.implicits._
 import Utils._
-import uzhttp.HTTPError.{Forbidden, Unauthorized}
+import uzhttp.HTTPError.Forbidden
 
 object AuthorizedRoutes {
   val routes: PartialFunction[(Request, AuthInfo), IO[HTTPError, Response]] = {

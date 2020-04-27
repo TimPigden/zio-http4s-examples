@@ -4,23 +4,20 @@ import uzhttp.Request.{Method, WebsocketRequest}
 import uzhttp.{HTTPError, Request, Response}
 import zio._
 import uzsttp.auth.Authorizer._
-import uzsttp.servers.Processor.HRequest
+import uzsttp.servers.EndPoint.HRequest
 import cats.implicits._
 import Utils._
 import cats.data.NonEmptyList
-import sttp.model.Uri
-import sttp.model.Uri.PathSegment
 import uzhttp.HTTPError.{BadRequest, Forbidden, NotFound, Unauthorized}
-import uzsttp.auth.{auth, authorizer}
+import uzsttp.auth.auth
 import zio.stream._
 import hrequest._
-import sttp.client.HttpError
 import uzhttp.websocket._
 
-object Processor {
+object EndPoint {
   type HRequest = Has[Request]
 
-  type Processor[R <: HRequest] = ZIO[R, Option[HTTPError], Response]
+  type EndPoint[R <: HRequest] = ZIO[R, Option[HTTPError], Response]
 
   def endsWith(ss: NonEmptyList[String])(in: Seq[String]): Boolean =
     in.endsWith(ss.toList)
@@ -45,7 +42,7 @@ object Processor {
     } yield matched
   }
 
-  def orNotFound[R <: HRequest](p: Processor[R]): ZIO[R, HTTPError, Response] =
+  def orNotFound[R <: HRequest](p: EndPoint[R]): ZIO[R, HTTPError, Response] =
     for {
       r <- request
       pp <- p.mapError {
@@ -62,12 +59,12 @@ object Processor {
       else IO.fail(Some(Forbidden("go get permission")))
     } yield res
 
-  def noAuthHandler(p: Processor[HRequest]): Request => IO[HTTPError, Response] =
+  def noAuthHandler(p: EndPoint[HRequest]): Request => IO[HTTPError, Response] =
     { req: Request =>
         orNotFound(p).provideLayer(ZLayer.succeed(req))
     }
 
-  def authHandler(p: Processor[HRequest with Auth]): ZIO[Authorizer, HTTPError, Request => IO[HTTPError, Response]] =
+  def authHandler(p: EndPoint[HRequest with Auth]): ZIO[Authorizer, HTTPError, Request => IO[HTTPError, Response]] =
     ZIO.access[Authorizer](_.get).map { aut => { req: Request =>
       (for {
         authInfo <- getAuthorization(req).provideLayer(ZLayer.succeed(aut))
@@ -80,9 +77,9 @@ object Processor {
       }}
     }
 
-  def combineRoutes[R <: HRequest](h: Processor[R], t: Processor[R]*): Processor[R] =
-    t.tail.foldLeft(h)((acc, it) =>
-      acc orElseOptional it
+  def combineRoutes[R <: HRequest](h: EndPoint[R], t: EndPoint[R]*): EndPoint[R] =
+    t.foldLeft(h)((acc, it) =>
+      acc catchSome { case None => it }
     )
 }
 

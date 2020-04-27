@@ -50,7 +50,7 @@ lazy val http4sDsl = "org.http4s"      %% "http4s-dsl"          % Http4sVersion
 
 
 // lazy val `zio-kafka-version` = "0.4.1+34-69f19fa2+20191205-1812"
-lazy val zioVersion = "1.0.0-RC18-2+147-6dcf6568-SNAPSHOT"
+lazy val zioVersion = "1.0.0-RC18-2"
 
 lazy val zio = "dev.zio" %% "zio" %  zioVersion
 lazy val `zio-streams` = "dev.zio" %% "zio-streams" % zioVersion
@@ -64,7 +64,6 @@ val uzhttp = "org.polynote" %% "uzhttp" % "0.1.3"
 val sttp = "com.softwaremill.sttp.client" %% "core" % "2.0.7"
 val sttpzio  = "com.softwaremill.sttp.client" %% "async-http-client-backend-zio" % "2.0.7"
 val sttpziostreams  = "com.softwaremill.sttp.client" %% "async-http-client-backend-zio-streams" % "2.0.7"
-
 
 lazy val commonSettings = Seq(
   parallelExecution in Test := false,
@@ -139,3 +138,4 @@ lazy val `streams` = (project in file ("streams"))
 
 */
 
+parallelExecution in Test := false
