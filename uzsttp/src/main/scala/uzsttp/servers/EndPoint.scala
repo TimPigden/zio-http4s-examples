@@ -13,6 +13,7 @@ import uzsttp.auth.auth
 import zio.stream._
 import hrequest._
 import uzhttp.websocket._
+import uzsttp.encoding.Encoders.{StringParser, StringWriter}
 
 object EndPoint {
   type HRequest = Has[Request]
@@ -85,9 +86,13 @@ object EndPoint {
 
 package object hrequest {
   def request = ZIO.access[HRequest](_.get)
-  def uri = request.map{r =>
-    r.uri.getPath.split("/").toList.filterNot(_ == "") }
+
+  def uri = request.map { r =>
+    r.uri.getPath.split("/").toList.filterNot(_ == "")
+  }
+
   def method = request.map(_.method)
+
   def stringBody = for {
     req <- request
     s <- req.body match {
@@ -106,17 +111,15 @@ package object hrequest {
       }
     } yield ws
 
-  def handleWebsocketFrame(textHandler: String => IO[HTTPError, Frame])
-                          (frame: Frame): UIO[Stream[HTTPError, Take[Nothing, Frame]]] = frame match {
-    case frame@Binary(data, _)       => UIO.succeed(Stream.empty)
-    case frame@Text(data, _)         => textHandler(data)
-        .either.map {
-          case Left(err) => Stream.fail(err)
-          case Right(f) => Stream(Take.Value(f))
-    }
-    case frame@Continuation(data, _) => UIO.succeed(Stream.empty)
-    case Ping => UIO(Stream(Take.Value(Pong)))
-    case Pong => UIO(Stream.empty)
-    case Close => UIO(Stream(Take.Value(Close), Take.End))
+  def handleWebsocketFrame(textHandler: String => Stream[HTTPError, Take[Nothing, Frame]])
+                          (frame: Frame): Stream[HTTPError, Take[Nothing, Frame]] = frame match {
+    case frame@Binary(data, _) => Stream.empty
+    case frame@Text(data, _) => textHandler(data)
+    case frame@Continuation(data, _) => Stream.empty
+    case Ping => Stream(Take.Value(Pong))
+    case Pong => Stream.empty
+    case Close => Stream(Take.Value(Close), Take.End)
   }
+
+
 }

@@ -35,6 +35,15 @@ object TestUtil {
       .serve
   )
 
+  def serverLayer2M[R](zEndPoint: RIO[R, EndPoint[HRequest]]) = ZLayer.fromManaged {
+    val zm = zEndPoint.map { p =>
+      Server.builder(new InetSocketAddress("127.0.0.1", 8080))
+        .handleAll(noAuthHandler(p))
+        .serve
+    }
+    ZManaged.unwrap(zm)
+  }
+
   def serverLayerM[R](handlerM: RIO[R, PartialFunction[Request, IO[HTTPError, Response]]]) =
     ZLayer.fromManaged {
       val zm = handlerM.map { handler =>
@@ -62,5 +71,5 @@ object TestUtil {
 
   def serverUp = ZIO.access[UZServer](_.get).map{_.awaitUp}
 
- 
+
 }

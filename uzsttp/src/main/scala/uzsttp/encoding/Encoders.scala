@@ -18,13 +18,21 @@ object Encoders {
 
   case class ParseError(msg: String) extends Throwable(msg)
 
-  trait XmlWriter[A] {
-    def write(a: A): Node
+  trait Encoder[Src, A] {
+    def write(a: A): Src
   }
 
-  trait XmlParser[A] {
-    def parse(node: Node): Task[A]
+  trait Decoder[Src, A] {
+    def parse(src: Src): Task[A]
   }
+
+  type XmlWriter[A] = Encoder[Node, A]
+
+  type XmlParser[A] = Decoder[Node, A]
+
+  type StringWriter[A] = Encoder[String, A]
+
+  type StringParser[A] = Decoder[String, A]
 
   implicit val personXmlWriter: XmlWriter[Person] = { p =>
     <Person>
@@ -51,8 +59,8 @@ object Encoders {
 
   def extractStringBody(req: Request): IO[HTTPError, String] =
     req.body match {
-        case Some(value) => 
-          value.run(ZSink.utf8DecodeChunk)            
+        case Some(value) =>
+          value.run(ZSink.utf8DecodeChunk)
         case None        => ZIO.fail(BadRequest("Missing body"))
     }
 
@@ -73,7 +81,7 @@ object Encoders {
 
 
   def writeXmlString[T](t: T)(implicit xmlWriter: XmlWriter[T]) = {
-    // extravagently spaced pretty version for ease of debugging 
+    // extravagently spaced pretty version for ease of debugging
     val pretty = new PrettyPrinter(80, 2)
     pretty.format(xmlWriter.write(t))
   }
@@ -85,5 +93,8 @@ object Encoders {
     xmlResponse(writeXmlString(t))
   }
 
+  implicit val personParser: StringParser[Person] = { s => parseXmlString(s) }
+
+  implicit val personWriter: StringWriter[Person] = { s => writeXmlString[Person](s)}
 
 }
