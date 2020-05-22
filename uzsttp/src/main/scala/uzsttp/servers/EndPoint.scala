@@ -14,6 +14,7 @@ import zio.stream._
 import hrequest._
 import uzhttp.websocket._
 import uzsttp.encoding.Encoders.{StringParser, StringWriter}
+import zio.stream.ZStream.Take
 
 object EndPoint {
   type HRequest = Has[Request]
@@ -82,10 +83,23 @@ object EndPoint {
     t.foldLeft(h)((acc, it) =>
       acc catchSome { case None => it }
     )
+
+  def requestStringBody(req: Request): IO[HTTPError, String] =
+    req.body match {
+      case Some(value) =>
+        value.transduce(ZTransducer.utf8Decode).runHead.someOrFail(BadRequest("Missing body"))
+      case None => ZIO.fail(BadRequest("Missing body"))
+    }
 }
 
 package object hrequest {
   def request = ZIO.access[HRequest](_.get)
+
+  def stringBody =
+    for {
+      req <- request
+      s <- EndPoint.requestStringBody(req)
+    } yield s
 
   def uri = request.map { r =>
     r.uri.getPath.split("/").toList.filterNot(_ == "")
@@ -93,14 +107,6 @@ package object hrequest {
 
   def method = request.map(_.method)
 
-  def stringBody = for {
-    req <- request
-    s <- req.body match {
-      case Some(value) =>
-        value.run(ZSink.utf8DecodeChunk)
-      case None => ZIO.fail(BadRequest("Missing body"))
-    }
-  } yield s
 
   def webSocket: ZIO[HRequest, HTTPError, WebsocketRequest] =
     for {
@@ -116,9 +122,9 @@ package object hrequest {
     case frame@Binary(data, _) => Stream.empty
     case frame@Text(data, _) => textHandler(data)
     case frame@Continuation(data, _) => Stream.empty
-    case Ping => Stream(Take.Value(Pong))
+    case Ping => Stream(Exit.succeed(Chunk(Pong)))
     case Pong => Stream.empty
-    case Close => Stream(Take.Value(Close), Take.End)
+    case Close => Stream(Exit.succeed(Chunk(Close)), Take.End)
   }
 
 

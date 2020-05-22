@@ -1,16 +1,7 @@
 package uzsttp.servers
 import uzhttp._
-import Request._
-import uzhttp.header._
-import java.net.URI
-
-import zio.stream.{Stream, StreamChunk, Take, ZStream}
 import zio._
 import zio.test._
-import Assertion._
-import uzhttp.Version.Http11
-import uzhttp.Request.Method.GET
-import HTTPError._
 import uzhttp.server.Server
 import java.net.InetSocketAddress
 

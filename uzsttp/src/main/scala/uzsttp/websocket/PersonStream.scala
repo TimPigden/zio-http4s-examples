@@ -12,12 +12,13 @@ import uzsttp.servers.EndPoint._
 import zio._
 import zio.clock.Clock
 import zio.duration._
+import zio.stream.ZStream.Take
 
 object PersonStream {
   def agePerson(text: String): Stream[HTTPError, Take[Nothing, Text]] =
     ZStream.unwrap {
       parseXmlString[Person](text).bimap(err => BadRequest(err.getMessage),
-        person => Stream(Take.Value(Text(writeXmlString(older(person)), true))))
+        person => Stream(Exit.succeed(Chunk(Text(writeXmlString(older(person)))))))
     }
 
   val agePersonByOne: EndPoint[HRequest] =
@@ -25,7 +26,7 @@ object PersonStream {
       req <- webSocket.mapError(e => Some(e))
       _ <- uriMethod(endsWith("wsPersonOneByOne"), Method.GET)
 
-      streamOut = Stream.flatten(req.frames.map(handleWebsocketFrame(agePerson))).unTake
+      streamOut = req.frames.map(handleWebsocketFrame(agePerson)).flatMap(_.collectWhileSuccess.flattenChunks)
       response <- Response.websocket(req, streamOut).mapError(e => Some(e))
     } yield response
 }
@@ -50,14 +51,14 @@ case class PersonStream(clk: Clock.Service) {
   def autoAgeText(text: String): Stream[HTTPError, Take[Nothing, Frame]] =
     ZStream.unwrap {
       parseXmlString[Person](text).bimap(err => BadRequest(err.getMessage),
-        person => autoAge(person).map { p => Take.Value(Text(writeXmlString(p)))})
+        person => autoAge(person).map { p => Exit.succeed(Chunk(Text(writeXmlString(p))))})
     }
 
   val agePerson: EndPoint[HRequest] =
     for {
       req <- webSocket.mapError(e => Some(e))
       _ <- uriMethod(endsWith("wsPerson"), Method.GET)
-      streamOut = Stream.flatten(req.frames.map(handleWebsocketFrame(autoAgeText))).unTake
+      streamOut = req.frames.map(handleWebsocketFrame(autoAgeText)).flatMap(_.collectWhileSuccess.flattenChunks)
       response <- Response.websocket(req, streamOut).mapError(e => Some(e))
     } yield response
 

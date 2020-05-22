@@ -8,10 +8,10 @@ import zio._
 import scala.xml.{Node, NodeSeq, PrettyPrinter, XML}
 import uzhttp.{HTTPError, Request, Response, Status}
 import uzhttp.HTTPError.BadRequest
-import zio.stream.{Take, ZSink, ZStream}
+import zio.stream.{ZSink, ZTransducer}
 import Response._
 import sttp.client.HttpError
-import uzsttp.servers.EndPoint.HRequest
+import uzsttp.servers.EndPoint._
 import uzsttp.servers.hrequest
 
 object Encoders {
@@ -57,16 +57,9 @@ object Encoders {
       parsed <- xmlParser.parse(validXml)
     } yield parsed
 
-  def extractStringBody(req: Request): IO[HTTPError, String] =
-    req.body match {
-        case Some(value) =>
-          value.run(ZSink.utf8DecodeChunk)
-        case None        => ZIO.fail(BadRequest("Missing body"))
-    }
-
   def extractXmlBody[T](req: Request)(implicit xmlParser: XmlParser[T]): IO[HTTPError, T] =
     for {
-      s <- extractStringBody(req)
+      s <- requestStringBody(req)
       _ = println(s"extracted string body $s")
       t <- parseXmlString(s)(xmlParser).mapError(e => BadRequest(e.getMessage))
     } yield t

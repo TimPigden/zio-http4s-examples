@@ -14,8 +14,12 @@ import TestUtil._
 import uzsttp.websocket.PersonStream
 import uzsttp.websocket.PersonStream._
 import zio.clock.Clock
-import zio.stream.{Take, ZStream}
+import zio.stream.ZStream
+import zio.stream.ZStream.Take
 
+/**
+ * Much of this test is just about fiddling around with streams! So not all about websockets
+ */
 object WebsocketTest extends DefaultRunnableSpec {
 
   def sendPerson(person: Person, ws: WebSocket[Task]) = {
@@ -60,7 +64,7 @@ object WebsocketTest extends DefaultRunnableSpec {
           case Some(person) =>
             for {
               _ <- UIO(println(s"got person $person"))
-              _ <- q.offer(Take.Value(person))
+              _ <- q.offer(Exit.succeed(Chunk(person)))
             } yield false
         }
       } yield ended
@@ -79,7 +83,7 @@ object WebsocketTest extends DefaultRunnableSpec {
       _ = println(s"response is $response")
       ws = response.result
       sent <- sendPerson(joe.copy(age = 101), ws)
-      agingPeople <- asStream(ws).map(_.unTake).map(_.takeWhile(_ != DEATH))
+      agingPeople <- asStream(ws).map(_.collectWhileSuccess.flattenChunks).map(_.takeWhile(_ != DEATH))
       allPeople <- agingPeople.runCollect
       _ <- ws.close
     } yield assert(allPeople.size)(equalTo(0))
@@ -92,10 +96,10 @@ object WebsocketTest extends DefaultRunnableSpec {
       _ = println(s"response is $response")
       ws = response.result
       sent <- sendPerson(joe.copy(age = 78), ws)
-      agingPeople <- asStream(ws).map(_.unTake).map(_.takeWhile(_ != DEATH))
+      agingPeople <- asStream(ws).map(_.collectWhileSuccess.flattenChunks).map(_.takeWhile(_ != DEATH))
       _ <- ws.close
       allPeople <- agingPeople.runCollect
-      //_ <- UIO(println(s"all people ${allPeople.mkString("\n")}"))
+      _ <- UIO(println(s"all people ${allPeople.mkString("\n")}"))
     } yield assert(allPeople.size)(equalTo(23))
   }
 
@@ -106,7 +110,7 @@ object WebsocketTest extends DefaultRunnableSpec {
       _ = println(s"response is $response")
       ws = response.result
       sent <- sendPerson(joe.copy(age = 1), ws)
-      agingPeople <- asStream(ws).map(_.unTake).map(_.take(200))
+      agingPeople <- asStream(ws).map(_.collectWhileSuccess.flattenChunks).map(_.take(200))
       _ <- ws.close
       allPeople <- agingPeople.runCollect
     } yield assert(allPeople.size)(equalTo(200))
