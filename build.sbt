@@ -6,7 +6,7 @@ credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 resolvers += Resolver.sonatypeRepo("releases")
 
 inThisBuild(Seq(
-  version := "0.7",
+  version := "0.8",
   isSnapshot := true,
   scalaVersion := "2.12.11",
   resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
@@ -38,7 +38,7 @@ lazy val catsEffect =  "org.typelevel" %% "cats-effect" % "2.1.1"
 val commonsIo = "commons-io" % "commons-io" % "2.4"
 val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
-val magnolia = "com.propensive" %% "magnolia" % "0.12.0"
+val magnolia = "com.propensive" %% "magnolia" % "0.17.0"
 
 lazy val avro = "org.apache.avro" % "avro" % "1.9.1"
 lazy val snappy = "org.xerial.snappy" % "snappy-java" % "1.1.7.3"
@@ -49,8 +49,7 @@ lazy val http4sBlazeClient = "org.http4s"  %% "http4s-blaze-client" % Http4sVers
 lazy val http4sDsl = "org.http4s"      %% "http4s-dsl"          % Http4sVersion
 
 
-// lazy val `zio-kafka-version` = "0.4.1+34-69f19fa2+20191205-1812"
-lazy val zioVersion = "1.0.0-RC19-2"
+lazy val zioVersion = "1.0.1"
 
 lazy val zio = "dev.zio" %% "zio" %  zioVersion
 lazy val `zio-streams` = "dev.zio" %% "zio-streams" % zioVersion
@@ -60,8 +59,8 @@ lazy val `zio-test-sbt` = "dev.zio" %% "zio-test-sbt" % zioVersion % "test"
 lazy val `zio-interop-shared` = "dev.zio" %% "zio-interop-shared" % zioVersion
 // lazy val `zio-interop-cats` = "dev.zio" %% "zio-interop-cats" % `zio-interop`
 
-val uzhttp = "org.polynote" %% "uzhttp" % "0.2.2"
-val sttpVersion = "2.1.2"
+val uzhttp = "org.polynote" %% "uzhttp" % "0.2.5"
+val sttpVersion = "2.2.5"
 val sttp = "com.softwaremill.sttp.client" %% "core" % sttpVersion
 val sttpzio  = "com.softwaremill.sttp.client" %% "async-http-client-backend-zio" % sttpVersion
 val sttpziostreams  = "com.softwaremill.sttp.client" %% "async-http-client-backend-zio-streams" % sttpVersion

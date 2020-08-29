@@ -15,7 +15,6 @@ import uzsttp.websocket.PersonStream
 import uzsttp.websocket.PersonStream._
 import zio.clock.Clock
 import zio.stream.ZStream
-import zio.stream.ZStream.Take
 
 /**
  * Much of this test is just about fiddling around with streams! So not all about websockets
@@ -50,29 +49,33 @@ object WebsocketTest extends DefaultRunnableSpec {
   }
 
 
-  def asStream(ws: WebSocket[Task]): Task[ZStream[Any, Nothing, Take[Nothing, Person]]] = {
+  def asStream(ws: WebSocket[Task]): RIO[Clock, ZStream[Clock, Nothing, Person]] = {
 
-    def processQueue(q: Queue[Take[Nothing, Person]]): Task[Boolean] =
+    def processQueue(q: Queue[Person]): Task[Boolean] =
       for {
         ws <- next(ws)
         ended <- ws match {
           case None =>
             for {
-              _ <- q.offer(Take.End)
+              _ <- q.shutdown
               _ <- UIO(println(s"got end of stream"))
             } yield true
           case Some(person) =>
             for {
               _ <- UIO(println(s"got person $person"))
-              _ <- q.offer(Exit.succeed(Chunk(person)))
+              _ <- q.offer(person)
             } yield false
         }
       } yield ended
 
     for {
-      q <- Queue.unbounded[Take[Nothing,Person]]
+      q <- Queue.unbounded[Person]
       f = ZStream.fromQueueWithShutdown(q)
-      _ <- processQueue(q).repeat(Schedule.doUntil(bool => bool)).fork
+      _ <- processQueue(q).repeat(Schedule.recurUntil[Boolean](bool => bool)).forkDaemon
+      _ <- (for {
+        _ <- q.awaitShutdown
+        _ <- ws.close
+      } yield()).forkDaemon
     } yield f
   }
 
@@ -83,7 +86,7 @@ object WebsocketTest extends DefaultRunnableSpec {
       _ = println(s"response is $response")
       ws = response.result
       sent <- sendPerson(joe.copy(age = 101), ws)
-      agingPeople <- asStream(ws).map(_.collectWhileSuccess.flattenChunks).map(_.takeWhile(_ != DEATH))
+      agingPeople <- asStream(ws).map(_.takeWhile(_ != DEATH))
       allPeople <- agingPeople.runCollect
       _ <- ws.close
     } yield assert(allPeople.size)(equalTo(0))
@@ -96,7 +99,7 @@ object WebsocketTest extends DefaultRunnableSpec {
       _ = println(s"response is $response")
       ws = response.result
       sent <- sendPerson(joe.copy(age = 78), ws)
-      agingPeople <- asStream(ws).map(_.collectWhileSuccess.flattenChunks).map(_.takeWhile(_ != DEATH))
+      agingPeople <- asStream(ws).map(_.takeWhile(_ != DEATH))
       _ <- ws.close
       allPeople <- agingPeople.runCollect
       _ <- UIO(println(s"all people ${allPeople.mkString("\n")}"))
@@ -110,7 +113,7 @@ object WebsocketTest extends DefaultRunnableSpec {
       _ = println(s"response is $response")
       ws = response.result
       sent <- sendPerson(joe.copy(age = 1), ws)
-      agingPeople <- asStream(ws).map(_.collectWhileSuccess.flattenChunks).map(_.take(200))
+      agingPeople <- asStream(ws).map(_.take(200))
       _ <- ws.close
       allPeople <- agingPeople.runCollect
     } yield assert(allPeople.size)(equalTo(200))
