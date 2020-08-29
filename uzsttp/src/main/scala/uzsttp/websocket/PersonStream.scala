@@ -9,16 +9,13 @@ import uzsttp.servers.Person
 import zio.stream._
 import uzsttp.servers.hrequest._
 import uzsttp.servers.EndPoint._
-import zio._
 import zio.clock.Clock
-import zio.duration._
-import zio.stream.ZStream.Take
 
 object PersonStream {
-  def agePerson(text: String): Stream[HTTPError, Take[Nothing, Text]] =
+  def agePerson(text: String): Stream[HTTPError, Text] =
     ZStream.unwrap {
       parseXmlString[Person](text).bimap(err => BadRequest(err.getMessage),
-        person => Stream(Exit.succeed(Chunk(Text(writeXmlString(older(person)))))))
+        person => Stream(Text(writeXmlString(older(person)))))
     }
 
   val agePersonByOne: EndPoint[HRequest] =
@@ -26,8 +23,8 @@ object PersonStream {
       req <- webSocket.mapError(e => Some(e))
       _ <- uriMethod(endsWith("wsPersonOneByOne"), Method.GET)
 
-      streamOut = req.frames.map(handleWebsocketFrame(agePerson)).flatMap(_.collectWhileSuccess.flattenChunks)
-      response <- Response.websocket(req, streamOut).mapError(e => Some(e))
+      streamOut: Stream[Throwable, Stream[HTTPError, Frame]] = req.frames.map(handleWebsocketFrame(agePerson))
+      response <- Response.websocket(req, streamOut.flatten).mapError(e => Some(e))
     } yield response
 }
 
@@ -48,17 +45,17 @@ case class PersonStream(clk: Clock.Service) {
     stream
   }
 
-  def autoAgeText(text: String): Stream[HTTPError, Take[Nothing, Frame]] =
+  def autoAgeText(text: String): Stream[HTTPError, Frame] =
     ZStream.unwrap {
       parseXmlString[Person](text).bimap(err => BadRequest(err.getMessage),
-        person => autoAge(person).map { p => Exit.succeed(Chunk(Text(writeXmlString(p))))})
+        person => autoAge(person).map { p => Text(writeXmlString(p))})
     }
 
   val agePerson: EndPoint[HRequest] =
     for {
       req <- webSocket.mapError(e => Some(e))
       _ <- uriMethod(endsWith("wsPerson"), Method.GET)
-      streamOut = req.frames.map(handleWebsocketFrame(autoAgeText)).flatMap(_.collectWhileSuccess.flattenChunks)
+      streamOut = req.frames.map(handleWebsocketFrame(autoAgeText)).flatten
       response <- Response.websocket(req, streamOut).mapError(e => Some(e))
     } yield response
 

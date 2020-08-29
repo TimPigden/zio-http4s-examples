@@ -117,14 +117,14 @@ package object hrequest {
       }
     } yield ws
 
-  def handleWebsocketFrame(textHandler: String => Stream[HTTPError, Take[Nothing, Frame]])
-                          (frame: Frame): Stream[HTTPError, Take[Nothing, Frame]] = frame match {
+  def handleWebsocketFrame(textHandler: String => Stream[HTTPError, Frame])
+                          (frame: Frame): Stream[HTTPError, Frame] = frame match {
     case frame@Binary(data, _) => Stream.empty
     case frame@Text(data, _) => textHandler(data)
     case frame@Continuation(data, _) => Stream.empty
-    case Ping => Stream(Exit.succeed(Chunk(Pong)))
+    case Ping => Stream(Pong)
     case Pong => Stream.empty
-    case Close => Stream(Exit.succeed(Chunk(Close)), Take.End)
+    case Close => Stream(Close)
   }
 
 
