@@ -8,7 +8,7 @@ resolvers += Resolver.sonatypeRepo("releases")
 inThisBuild(Seq(
   version := "0.8",
   isSnapshot := true,
-  scalaVersion := "2.12.11",
+  scalaVersion := "2.13.3",
   resolvers +=   "Sonatype OSS Snapshots" at "https://oss.sonatype.org/content/repositories/snapshots"
 ))
 
@@ -19,22 +19,21 @@ lazy val myScalacOptions = Seq(
   "-unchecked",
   "-deprecation",
   "-Xfuture",
-  "-Yno-adapted-args",
   "-Ywarn-dead-code",
   "-Ywarn-numeric-widen",
   "-language:postfixOps",
   "-language:higherKinds",
   "-language:implicitConversions",
   "-Ywarn-value-discard",
-  "-Ypartial-unification")
+)
 
 lazy val scalaTestVersion = "3.0.8"
 
-lazy val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.2.0"
+lazy val scalaXml = "org.scala-lang.modules" %% "scala-xml" % "1.3.0"
 lazy val json4s =  "org.json4s" %% "json4s-jackson" % "3.6.6"
 
 lazy val cats = "org.typelevel" %% "cats-core" % "2.1.1"
-lazy val catsEffect =  "org.typelevel" %% "cats-effect" % "2.1.1"
+lazy val catsEffect =  "org.typelevel" %% "cats-effect" % "2.2.0"
 val commonsIo = "commons-io" % "commons-io" % "2.4"
 val logback = "ch.qos.logback" % "logback-classic" % "1.2.3"
 
@@ -60,7 +59,7 @@ lazy val `zio-interop-shared` = "dev.zio" %% "zio-interop-shared" % zioVersion
 // lazy val `zio-interop-cats` = "dev.zio" %% "zio-interop-cats" % `zio-interop`
 
 val uzhttp = "org.polynote" %% "uzhttp" % "0.2.5"
-val sttpVersion = "2.2.5"
+val sttpVersion = "2.2.9"
 val sttp = "com.softwaremill.sttp.client" %% "core" % sttpVersion
 val sttpzio  = "com.softwaremill.sttp.client" %% "async-http-client-backend-zio" % sttpVersion
 val sttpziostreams  = "com.softwaremill.sttp.client" %% "async-http-client-backend-zio-streams" % sttpVersion
@@ -70,7 +69,7 @@ lazy val commonSettings = Seq(
   scalacOptions ++= myScalacOptions,
   organization := "com.optrak",
   testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
-  addCompilerPlugin("org.spire-math" %% "kind-projector" % "0.9.8"),
+  addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.0" cross CrossVersion.full),
   exportJars := true,
   updateOptions := updateOptions.value.withCachedResolution(true),
   libraryDependencies ++= Seq(
