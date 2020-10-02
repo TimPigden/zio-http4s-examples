@@ -132,8 +132,10 @@ object WebsocketTest extends DefaultRunnableSpec {
     emptyStream,
     nonEmptyStream,
     cutShortInfiniteStream,
-  ).provideCustomLayerShared(AsyncHttpClientZioBackend.layer() ++ Clock.live ++ serverLayer2M(endPoints)).mapError(TestFailure.fail)
-
+  ).provideCustomLayerShared(AsyncHttpClientZioBackend.layer() ++ Clock.live ++ serverLayer2M(endPoints)).mapError {
+    case a: TestFailure.Assertion => a
+    case o => TestFailure.fail(o)
+  }
   override def spec = streamTests
 
 }
